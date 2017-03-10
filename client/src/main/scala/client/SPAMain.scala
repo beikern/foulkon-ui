@@ -1,12 +1,11 @@
 package client
 
 import client.components.GlobalStyles
-import client.modules.Dashboard
-import japgolly.scalajs.react.ReactDOM
-import japgolly.scalajs.react.extra.router._
-import japgolly.scalajs.react.vdom.prefix_<^._
-import org.scalajs.dom
 import client.logger._
+import client.modules.Dashboard
+import japgolly.scalajs.react.extra.router._
+import japgolly.scalajs.react.vdom.html_<^._
+import org.scalajs.dom
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
@@ -53,7 +52,8 @@ object SPAMain extends js.JSApp {
     GlobalStyles.addToDocument()
     // create the router
     val router = Router(BaseUrl.until_#, routerConfig)
+
     // tell React to render the router in the document body
-    ReactDOM.render(router(), dom.document.getElementById("root"))
+    router.mapUnmounted(_.renderIntoDOM(dom.document.getElementById("root")))
   }
 }

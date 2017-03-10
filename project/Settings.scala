@@ -24,8 +24,8 @@ object Settings {
   object versions {
     val scala = "2.11.8"
     val scalaDom = "0.9.1"
-    val scalajsReact = "0.11.3"
-    val scalaCSS = "0.5.0"
+    val scalajsReact = "1.0.0-RC1"
+    val scalaCSS = "0.5.3-RC1"
     val log4js = "1.4.10"
     val autowire = "0.2.5"
     val booPickle = "1.2.5"
@@ -63,10 +63,10 @@ object Settings {
   val scalajsDependencies = Def.setting(Seq(
     "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
-    //"com.github.chandu0101.scalajs-react-components" %%% "core" % versions.scalajsReactComponents,
     "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
-    "me.chrons" %%% "diode" % versions.diode,
-    "me.chrons" %%% "diode-react" % versions.diode,
+    // Diode react has to update the dependency to work with the new scala react library.
+    // "me.chrons" %%% "diode" % versions.diode,
+    // "me.chrons" %%% "diode-react" % versions.diode,
     "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
     "com.lihaoyi" %%% "utest" % versions.uTest % Test
   ))
