@@ -1,10 +1,13 @@
 package client.components.bootstrap.styles
 
-import client.components.bootstrap.styles.BsStyle.BsStyle
-
 object BsSize extends Enumeration {
   type BsSize = Value
   val large, small, xsmall = Value
+}
+
+object BasicBsSize extends Enumeration {
+  type BasicBsSize = Value
+  val large, small = Value
 }
 
 object BsStyle extends Enumeration {
