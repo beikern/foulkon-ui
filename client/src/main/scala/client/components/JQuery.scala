@@ -6,9 +6,9 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName
 
 /**
-  * Minimal facade for JQuery. Use https://github.com/scala-js/scala-js-jquery or
-  * https://github.com/jducoeur/jquery-facade for more complete one.
-  */
+ * Minimal facade for JQuery. Use https://github.com/scala-js/scala-js-jquery or
+ * https://github.com/jducoeur/jquery-facade for more complete one.
+ */
 @js.native
 trait JQueryEventObject extends Event {
   var data: js.Any = js.native
