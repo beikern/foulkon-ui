@@ -23,23 +23,20 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.11.8"
-    val scalaDom = "0.9.1"
-    val scalajsReact = "1.0.0-RC1"
-    val scalaCSS = "0.5.3-RC1"
+    val scala = "2.11.11"
+    val scalaDom = "0.9.2"
+    val scalajsReact = "1.0.1"
+    val scalaCSS = "0.5.3"
     val log4js = "1.4.10"
-    val autowire = "0.2.5"
+    val autowire = "0.2.6"
     val booPickle = "1.2.5"
-    val diode = "1.1.1-LOCAL"
-    val uTest = "0.4.4"
-    val react = "15.3.1"
+    val diode = "1.1.2"
+    val uTest = "0.4.7"
+    val react = "15.5.4"
     val jQuery = "1.11.1"
     val bootstrap = "3.3.6"
     val chartjs = "2.1.3"
-
     val scalajsScripts = "1.0.0"
-
-    val scalajsReactComponents = "0.5.0"
   }
 
   /**
@@ -79,7 +76,7 @@ object Settings {
       Seq(
         "org.webjars.bower" % "react" % versions.react / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
         "org.webjars.bower" % "react" % versions.react / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM",
-        "org.webjars.bower" % "react-bootstrap" % "0.30.3" / "react-bootstrap.js" minified "react-bootstrap.min.js" commonJSName "ReactBootstrap",
+        "org.webjars.bower" % "react-bootstrap" % "0.30.3" / "react-bootstrap.js" minified "react-bootstrap.min.js" dependsOn "react-dom.js" commonJSName "ReactBootstrap",
         "org.webjars" % "jquery" % versions.jQuery / "jquery.js" minified "jquery.min.js",
         "org.webjars" % "bootstrap" % versions.bootstrap / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
         "org.webjars" % "chartjs" % versions.chartjs / "Chart.js" minified "Chart.min.js",

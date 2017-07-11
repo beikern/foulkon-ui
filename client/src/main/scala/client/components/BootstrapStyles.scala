@@ -2,7 +2,7 @@ package client.components
 
 import client.components.Bootstrap.CommonStyle
 
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 import client.components.Bootstrap.CommonStyle._
 import japgolly.univeq.UnivEq
 

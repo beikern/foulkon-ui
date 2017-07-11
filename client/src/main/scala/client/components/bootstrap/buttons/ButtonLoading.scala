@@ -36,7 +36,7 @@ object ButtonLoading {
   case class State(isLoading: Boolean)
 
   val component =
-    ScalaComponent.build[Props]("ButtonLoading")
+    ScalaComponent.builder[Props]("ButtonLoading")
       .initialState(State(isLoading = false))
       .renderBackend[Backend]
       .build

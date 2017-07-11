@@ -13,6 +13,7 @@ class ApiService extends Api {
   )
 
   override def getUsers(): Seq[User] = {
+    println("retrieving users")
     // Provide some fake users
     Thread.sleep(2000)
     users
