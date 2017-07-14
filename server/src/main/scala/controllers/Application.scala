@@ -3,11 +3,11 @@ package controllers
 import java.nio.ByteBuffer
 
 import boopickle.Default.{Pickle, Pickler, Unpickle}
-import com.google.inject.Inject
 import play.api.{Configuration, Environment}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.InjectedController
 import services.ApiService
 import boopickle.Default._
+import com.google.inject.Inject
 import shared.Api
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,7 +17,16 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def write[R: Pickler](r: R) = Pickle.intoBytes(r)
 }
 
-class Application @Inject()(implicit val config: Configuration, env: Environment) extends Controller {
+object TwirlTemplate {
+  def bundleUrl(projectName: String): Option[String] = {
+    val name = projectName.toLowerCase
+    Seq(s"$name-opt-bundle.js", s"$name-fastopt-bundle.js")
+      .find(name => getClass.getResource(s"/public/$name") != null)
+      .map(controllers.routes.Assets.versioned(_).url)
+  }
+}
+
+class Application @Inject() (implicit val config: Configuration, env: Environment) extends InjectedController {
   val apiService = new ApiService()
 
   def autowireApi(path: String) = Action.async(parse.raw) {
@@ -41,10 +50,19 @@ class Application @Inject()(implicit val config: Configuration, env: Environment
     Ok(views.html.index("SPA tutorial"))
   }
 
-  def logging = Action(parse.anyContent) { implicit request =>
-    request.body.asJson.foreach { msg =>
+
+  def logging = Action(parse.anyContent) {
+    request =>
+      request.body.asJson.foreach { msg =>
       println(s"CLIENT - $msg")
     }
     Ok("")
+  }
+
+  def bundleUrl(projectName: String): Option[String] = {
+    val name = projectName.toLowerCase
+    Seq(s"$name-opt-bundle.js", s"$name-fastopt-bundle.js")
+      .find(name => getClass.getResource(s"/public/$name") != null)
+      .map(controllers.routes.Assets.versioned(_).url)
   }
 }

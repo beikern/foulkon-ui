@@ -1,6 +1,6 @@
 @(title: String)(implicit config: play.api.Configuration, env: play.api.Environment)
 @import views.html.tags._
-
+@import controllers.TwirlTemplate._
 <!DOCTYPE html>
 
 <html lang="en">
@@ -14,6 +14,6 @@
 <body>
 <div id="root">
 </div>
-@scalajs.html.scripts(projectName = "client", name => _asset(name).toString, name => getClass.getResource(s"/public/$name") != null)
+<script src=@bundleUrl("client")></script>
 </body>
 </html>

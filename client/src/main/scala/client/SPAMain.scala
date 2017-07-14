@@ -3,7 +3,6 @@ package client
 import client.appstate.SPACircuit
 import client.components.GlobalStyles
 import client.components.bootstrap.buttons.{Button, ButtonGroup, ButtonLoading}
-import client.components.bootstrap.navigation._
 import client.components.bootstrap.pagelayouts.lists.{ListGroup, ListGroupItem}
 import client.components.bootstrap.pagelayouts.panels.Panel
 import client.components.bootstrap.pagelayouts.tables.Table
@@ -17,21 +16,23 @@ import org.scalajs.dom
 
 import scala.collection.immutable.ListMap
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.scalajs.js.JSApp
+import scala.scalajs.js.annotation.JSExportTopLevel
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 
-@JSExportTopLevel("SPAMain")
-object SPAMain extends js.JSApp {
+object SPAMain extends JSApp {
+
+  logger.log.info("wololo")
 
   // Define the locations (pages) used in this application
   sealed trait Location
 
   case object DashboardLocation extends Location
   case object UserLocation extends Location
-  val header = NavbarHeader(NavbarHeader.Props())
-  val nav = Nav(Nav.Props(), NavItem(NavItem.Props(), "Link"))
-  val navBar = NavBar(NavBar.Props(inverse = true), nav)
+//  val header = NavbarHeader(NavbarHeader.Props())
+//  val nav = Nav(Nav.Props(), NavItem(NavItem.Props(), "Link"))
+//  val navBar = NavBar(NavBar.Props(inverse = true), nav)
   val bootstrapButton = Button(Button.Props(BsStyle.primary, Callback{println("wonderful!")}), "hello")
   val buttonList =
     List(
@@ -126,8 +127,6 @@ object SPAMain extends js.JSApp {
       renderR(
         ctl =>
           <.div(
-            <.div("navBar???"),
-            <.div(^.className := "so-padded", navBar),
             <.div("Simple Bootstrap button"),
             <.div(^.className := "so-padded", bootstrapButton),
             <.div("Bootstrap button with state and callbacks"),
@@ -164,7 +163,6 @@ object SPAMain extends js.JSApp {
     )
   }
 
-  @JSExport
   def main(): Unit = {
     log.warn("Application starting")
     // send log messages also to the server

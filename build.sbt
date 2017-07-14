@@ -1,4 +1,5 @@
-import sbt.Keys._
+import org.scalajs.core.tools.io.{FileVirtualJSFile, VirtualJSFile}
+import sbt.Keys.{version, _}
 import sbt.Project.projectToRef
 
 // a special crossProject for configuring a JS/JVM/shared structure
@@ -19,27 +20,25 @@ lazy val elideOptions = settingKey[Seq[String]]("Set limit for elidable function
 
 // instantiate the JS project for SBT with some additional settings
 lazy val client: Project = (project in file("client"))
+  .settings(npmSettings)
   .settings(
     name := "client",
+    libraryDependencies ++= Settings.scalajsDependencies.value,
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.scalajsDependencies.value,
+    mainClass in Compile := Some("client.SPAMain"),
     // by default we do development build, no eliding
     elideOptions := Seq(),
-    scalacOptions ++= elideOptions.value,
-    jsDependencies ++= Settings.jsDependencies.value,
-    // RuntimeDOM is needed for tests
-    jsDependencies += RuntimeDOM % "test",
-    // yes, we want to package JS dependencies
     skip in packageJSDependencies := false,
-    // use Scala.js provided launcher code to start the client app
-    persistLauncher := true,
-    persistLauncher in Test := false,
-    // use uTest framework for tests
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    scalacOptions ++= elideOptions.value,
+    version in webpack := "2.6.1",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer.in(Test) := false,
+    webpackEmitSourceMaps := false,
+    enableReloadWorkflow := true
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb)
   .dependsOn(sharedJS)
 
 // Client projects (just one in this case)
@@ -52,7 +51,8 @@ lazy val server = (project in file("server"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.jvmDependencies.value,
+    libraryDependencies ++= Settings.jvmDependencies.value ++ Seq(guice),
+    scalaJSProjects := Seq(client),
     commands += ReleaseCmd,
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
@@ -60,10 +60,12 @@ lazy val server = (project in file("server"))
     scalaJSProjects := clients,
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
+    // Expose as sbt-web assets some files retrieved from the NPM packages of the `client` project
+    npmAssets ++= NpmAssets.ofProject(client) { modules => (modules / "font-awesome").*** }.value,
     // compress CSS
     LessKeys.compress in Assets := true
   )
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)
@@ -79,6 +81,41 @@ lazy val ReleaseCmd = Command.command("release") { state =>
   "set elideOptions in client := Seq()" ::
   state
 }
+
+// Settings
+lazy val npmSettings = Seq(
+  useYarn := true,
+  npmDependencies in Compile := Seq(
+    "elemental"                         -> Settings.versions.EuiVersion,
+    "highlight.js"                      -> "9.9.0",
+    "material-ui"                       -> Settings.versions.MuiVersion,
+    "react"                             -> Settings.versions.reactVersion,
+    "react-dom"                         -> Settings.versions.reactVersion,
+    "react-addons-create-fragment"      -> Settings.versions.reactVersion,
+    "react-addons-css-transition-group" -> "15.0.2",
+    "react-addons-pure-render-mixin"    -> "15.5.2",
+    "react-addons-transition-group"     -> "15.0.0",
+    "react-addons-update"               -> "15.5.2",
+    "react-geomicons"                   -> "2.1.0",
+    "react-infinite"                    -> "0.11.0",
+    "react-select"                      -> "1.0.0-rc.5",
+    "react-slick"                       -> "0.14.11",
+    "react-spinner"                     -> "0.2.7",
+    "react-tagsinput"                   -> "3.16.1",
+    "react-tap-event-plugin"            -> "2.0.1",
+    "semantic-ui-react"                 -> Settings.versions.SuiVersion,
+    "svg-loader"                        -> "0.0.2"
+  )
+)
+
+lazy val npmGenSettings = Seq(
+  useYarn := true,
+  npmDependencies.in(Compile) := Seq(
+    "elemental"         -> Settings.versions.EuiVersion,
+    "material-ui"       -> Settings.versions.MuiVersion,
+    "semantic-ui-react" -> Settings.versions.SuiVersion
+  )
+)
 
 // lazy val root = (project in file(".")).aggregate(client, server)
 

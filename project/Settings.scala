@@ -1,5 +1,8 @@
 import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbt.Keys._
+
+import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport._
 
 /**
  * Application settings. Configure the build for your application here.
@@ -23,7 +26,7 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.11.11"
+    val scala = "2.12.2"
     val scalaDom = "0.9.2"
     val scalajsReact = "1.0.1"
     val scalaCSS = "0.5.3"
@@ -36,7 +39,14 @@ object Settings {
     val jQuery = "1.11.1"
     val bootstrap = "3.3.6"
     val chartjs = "2.1.3"
-    val scalajsScripts = "1.0.0"
+    val scalajsScripts = "1.1.1"
+    val playJson = "2.6.0"
+
+    // js dependencies
+    val SuiVersion   = "0.68.5"
+    val EuiVersion   = "0.6.1"
+    val MuiVersion   = "0.18.1"
+    val reactVersion = "15.5.4"
   }
 
   /**
@@ -53,6 +63,7 @@ object Settings {
   val jvmDependencies = Def.setting(
       Seq(
         "com.vmunier" %% "scalajs-scripts" % versions.scalajsScripts,
+        "com.typesafe.play" %% "play-json" % versions.playJson,
         "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
         "org.webjars" % "bootstrap" % versions.bootstrap % Provided,
         "com.lihaoyi" %% "utest" % versions.uTest % Test
@@ -63,6 +74,7 @@ object Settings {
       Seq(
         "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
         "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
+        "com.olvind" %%% "scalajs-react-components" % "1.0.0",
         "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
         // Diode react has to update the dependency to work with the new scala react library.
         "io.suzaku" %%% "diode" % versions.diode,
