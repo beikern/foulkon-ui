@@ -58,11 +58,4 @@ class Application @Inject() (implicit val config: Configuration, env: Environmen
     }
     Ok("")
   }
-
-  def bundleUrl(projectName: String): Option[String] = {
-    val name = projectName.toLowerCase
-    Seq(s"$name-opt-bundle.js", s"$name-fastopt-bundle.js")
-      .find(name => getClass.getResource(s"/public/$name") != null)
-      .map(controllers.routes.Assets.versioned(_).url)
-  }
 }
