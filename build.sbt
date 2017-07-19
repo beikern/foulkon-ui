@@ -8,7 +8,7 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
     libraryDependencies ++= Settings.sharedDependencies.value
   )
   // set up settings specific to the JS project
-  .jsConfigure(_ enablePlugins ScalaJSWeb)
+  .jsConfigure(_.enablePlugins(ScalaJSWeb, ScalaJSBundlerPlugin))
 
 lazy val sharedJVM = shared.jvm.settings(name := "sharedJVM")
 
@@ -19,7 +19,7 @@ lazy val elideOptions = settingKey[Seq[String]]("Set limit for elidable function
 
 // instantiate the JS project for SBT with some additional settings
 lazy val client: Project = (project in file("client"))
-  .settings(npmDevSettings)
+  .settings(npmSettings, npmDevSettings)
   .settings(
     name := "client",
     libraryDependencies ++= Settings.scalajsDependencies.value,
@@ -31,24 +31,11 @@ lazy val client: Project = (project in file("client"))
     elideOptions := Seq(),
     scalacOptions ++= elideOptions.value,
     version in webpack := "2.6.1",
-    // Add a dependency to the expose-loader (which will expose react to the global namespace)
-
-    npmDependencies in Compile := Seq(
-      "react"                             -> Settings.versions.reactVersion,
-      "react-dom"                         -> Settings.versions.reactVersion,
-      "material-ui"                       -> Settings.versions.MuiVersion,
-      "react-tap-event-plugin"            -> "2.0.1",
-      "jquery"                            -> Settings.versions.jQuery,
-      "bootstrap"                         -> Settings.versions.bootstrap,
-      "log4javascript"                    -> Settings.versions.log4js
-    ),
-    webpackConfigFile in fastOptJS := Some(baseDirectory.value/"dev.webpack.config.js"),
-    webpackConfigFile in compile := Some(baseDirectory.value/"dev.webpack.config.js"),
-    webpackConfigFile in run := Some(baseDirectory.value/"dev.webpack.config.js"),
+//    webpackConfigFile := Some(baseDirectory.value/"webpack.config.js"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer.in(Test) := false,
     webpackEmitSourceMaps := false,
-    enableReloadWorkflow := true
+    enableReloadWorkflow := false
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
   .dependsOn(sharedJS)
@@ -101,14 +88,13 @@ lazy val npmSettings = Seq(
     "material-ui"                       -> Settings.versions.MuiVersion,
     "react-tap-event-plugin"            -> "2.0.1",
     "jquery"                            -> Settings.versions.jQuery,
-    "bootstrap"                         -> Settings.versions.bootstrap,
-    "log4javascript"                    -> Settings.versions.log4js
+    "bootstrap"                         -> Settings.versions.bootstrap
   )
 )
 
 lazy val npmDevSettings = Seq(
   npmDevDependencies.in(Compile) := Seq(
-    "expose-loader"              -> "0.7.3"
+    "expose-loader" -> "0.7.1"
   ))
 
 // lazy val root = (project in file(".")).aggregate(client, server)

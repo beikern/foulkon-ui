@@ -14,7 +14,7 @@ object Settings {
   val name = "scalajs-spa"
 
   /** The version of your application */
-  val version = "1.1.4"
+  val version = "0.0.1"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
@@ -28,7 +28,7 @@ object Settings {
   object versions {
     val scala = "2.12.2"
     val scalaDom = "0.9.2"
-    val scalajsReact = "1.0.1"
+    val scalajsReact = "1.1.0"
     val scalaCSS = "0.5.3"
     val log4js = "1.4.14"
     val autowire = "0.2.6"
@@ -76,7 +76,6 @@ object Settings {
         "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
         "com.olvind" %%% "scalajs-react-components" % "1.0.0",
         "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
-        // Diode react has to update the dependency to work with the new scala react library.
         "io.suzaku" %%% "diode" % versions.diode,
         "io.suzaku" %%% "diode-react" % versions.diode,
         "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
