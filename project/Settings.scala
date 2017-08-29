@@ -28,7 +28,8 @@ object Settings {
   object versions {
     val scala = "2.12.2"
     val scalaDom = "0.9.2"
-    val scalajsReact = "1.1.0"
+    val scalajsReact = "1.0.1"
+    val scalajsReactComponents = "0.7.0"
     val scalaCSS = "0.5.3"
     val log4js = "1.4.14"
     val autowire = "0.2.6"
@@ -43,10 +44,8 @@ object Settings {
     val playJson = "2.6.0"
 
     // js dependencies
-    val SuiVersion   = "0.68.5"
-    val EuiVersion   = "0.6.1"
-    val MuiVersion   = "0.18.1"
-    val reactVersion = "15.6.1"
+    val MuiVersion   = "0.17.0"
+    val reactVersion = "15.4.2"
   }
 
   /**
@@ -74,7 +73,7 @@ object Settings {
       Seq(
         "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
         "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
-        "com.olvind" %%% "scalajs-react-components" % "1.0.0",
+        "com.olvind" %%% "scalajs-react-components" % versions.scalajsReactComponents,
         "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
         "io.suzaku" %%% "diode" % versions.diode,
         "io.suzaku" %%% "diode-react" % versions.diode,

@@ -1,9 +1,8 @@
 package shared
 
-import shared.entities.User
+import shared.entities.{UserDetail, UserGroup}
 
 trait Api {
-
-  def getUsers(): Seq[User]
-
+  def getUsers(): Seq[UserDetail]
+  def getUserGroups(id: String): Option[Seq[UserGroup]]
 }

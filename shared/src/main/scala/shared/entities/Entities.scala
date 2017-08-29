@@ -3,20 +3,16 @@ package shared.entities
 case class UserDetail(
     id: String,
     externalId: String,
-    createdAt: Int,
-    updatedAt: Int,
-    urn: String,
-    groups: List[UserGroup]
+    path: String,
+    createdAt: String,
+    updatedAt: String,
+    urn: String
 )
 
 case class UserGroup(
     org: String,
     name: String,
-    joined: Int
-)
-
-case class User(
-    externalId: String
+    joined: String
 )
 
 

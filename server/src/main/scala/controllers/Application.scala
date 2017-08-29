@@ -2,9 +2,11 @@ package controllers
 
 import java.nio.ByteBuffer
 
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import boopickle.Default.{Pickle, Pickler, Unpickle}
 import play.api.{Configuration, Environment}
-import play.api.mvc.InjectedController
+import play.api.mvc.{Action, InjectedController, RawBuffer}
 import services.ApiService
 import boopickle.Default._
 import com.google.inject.Inject
@@ -26,10 +28,17 @@ object TwirlTemplate {
   }
 }
 
-class Application @Inject() (implicit val config: Configuration, env: Environment) extends InjectedController {
+class Application @Inject() (
+                              implicit val config: Configuration,
+                              env: Environment,
+                              implicit val actorSystem: ActorSystem
+                            ) extends InjectedController {
+
+  implicit val actorMaterializer = ActorMaterializer(ActorMaterializerSettings(actorSystem))
+
   val apiService = new ApiService()
 
-  def autowireApi(path: String) = Action.async(parse.raw) {
+  def autowireApi(path: String): Action[RawBuffer] = Action.async(parse.raw) {
     implicit request =>
       println(s"Request path: $path")
 

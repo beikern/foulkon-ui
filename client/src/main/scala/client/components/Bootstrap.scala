@@ -1,5 +1,6 @@
 package client.components
 
+import GlobalStyles._
 import scala.language.implicitConversions
 import scala.scalajs.js
 
