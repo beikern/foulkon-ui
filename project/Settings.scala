@@ -73,8 +73,8 @@ object Settings {
       Seq(
         "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
         "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
-        "com.olvind" %%% "scalajs-react-components" % versions.scalajsReactComponents,
         "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
+        "com.olvind" %%% "scalajs-react-components" % versions.scalajsReactComponents,
         "io.suzaku" %%% "diode" % versions.diode,
         "io.suzaku" %%% "diode-react" % versions.diode,
         "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,

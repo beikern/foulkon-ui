@@ -19,19 +19,29 @@ lazy val elideOptions = settingKey[Seq[String]]("Set limit for elidable function
 
 // instantiate the JS project for SBT with some additional settings
 lazy val client: Project = (project in file("client"))
-  .settings(npmSettings, npmDevSettings)
   .settings(
     name := "client",
-    libraryDependencies ++= Settings.scalajsDependencies.value,
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
+    useYarn := true,
     mainClass in Compile := Some("client.SPAMain"),
-    // by default we do development build, no eliding
-    elideOptions := Seq(),
-    scalacOptions ++= elideOptions.value,
-    version in webpack := "2.6.1",
-//    webpackConfigFile := Some(baseDirectory.value/"webpack.config.js"),
+    libraryDependencies ++= Settings.scalajsDependencies.value,
+    npmDependencies in Compile := Seq(
+      "react"                             -> Settings.versions.reactVersion,
+      "react-dom"                         -> Settings.versions.reactVersion,
+      "react-addons-create-fragment"      -> Settings.versions.reactVersion,
+      "react-addons-css-transition-group" -> Settings.versions.reactVersion,
+      "react-addons-pure-render-mixin"    -> Settings.versions.reactVersion,
+      "react-addons-transition-group"     -> Settings.versions.reactVersion,
+      "react-addons-update"               -> Settings.versions.reactVersion,
+      "material-ui"                       -> Settings.versions.MuiVersion,
+      "react-tap-event-plugin"            -> "2.0.1",
+      "jquery"                            -> Settings.versions.jQuery,
+      "bootstrap"                         -> Settings.versions.bootstrap
+    ),
+    npmDevDependencies in Compile += "expose-loader" -> "0.7.1",
+    webpackConfigFile := Some(baseDirectory.value/"webpack.config.js"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer.in(Test) := false,
     webpackEmitSourceMaps := false,
@@ -78,29 +88,6 @@ lazy val ReleaseCmd = Command.command("release") { state =>
   "set elideOptions in client := Seq()" ::
   state
 }
-
-// Settings
-lazy val npmSettings = Seq(
-  useYarn := true,
-  npmDependencies in Compile := Seq(
-    "react"                             -> Settings.versions.reactVersion,
-    "react-dom"                         -> Settings.versions.reactVersion,
-    "react-addons-create-fragment"      -> Settings.versions.reactVersion,
-    "react-addons-css-transition-group" -> Settings.versions.reactVersion,
-    "react-addons-pure-render-mixin"    -> Settings.versions.reactVersion,
-    "react-addons-transition-group"     -> Settings.versions.reactVersion,
-    "react-addons-update"               -> Settings.versions.reactVersion,
-    "material-ui"                       -> Settings.versions.MuiVersion,
-    "react-tap-event-plugin"            -> "2.0.1",
-    "jquery"                            -> Settings.versions.jQuery,
-    "bootstrap"                         -> Settings.versions.bootstrap
-  )
-)
-
-lazy val npmDevSettings = Seq(
-  npmDevDependencies.in(Compile) := Seq(
-    "expose-loader" -> "0.7.1"
-  ))
 
 // lazy val root = (project in file(".")).aggregate(client, server)
 

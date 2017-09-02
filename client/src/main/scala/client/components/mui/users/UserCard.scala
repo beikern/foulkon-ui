@@ -33,7 +33,7 @@ object UserCard {
   class Backend($: BackendScope[Props, State]) {
 
     def toggleGroup(updateGroup: Callback, groupExpanded: Boolean)(event: ReactEvent): Callback = {
-      if(groupExpanded){
+      if(!groupExpanded){
         updateGroup >> $.modState(s => s.copy(groupExpanded = !s.groupExpanded))
       } else {
         $.modState(s => s.copy(groupExpanded = !s.groupExpanded))

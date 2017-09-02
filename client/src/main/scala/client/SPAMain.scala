@@ -1,18 +1,23 @@
 package client
 
 import client.components.GlobalStyles
+import client.components.internal.ReactTapEventPlugin
 import client.components.mui.users.UserCard
 import japgolly.scalajs.react.extra.router._
 import org.scalajs.dom
 
+import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.GlobalRegistry
 
+
 @JSExportTopLevel("SPAMain")
 object SPAMain extends JSApp {
+
+  ReactTapEventPlugin(js.undefined)
 
   @JSExport
   def main(): Unit = {
