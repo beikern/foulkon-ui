@@ -30,10 +30,8 @@ object AppRouter {
           ctl =>
             <.div(
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Users", 1))),
-              <.div(^.className := "card-padded",
                 MuiMuiThemeProvider()
                 (userWrapper(UsersComponent(_)))
-              )
             )
         )
 

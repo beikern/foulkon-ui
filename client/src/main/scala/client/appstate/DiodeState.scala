@@ -23,13 +23,15 @@ case object RefreshUsers extends Action
 case class UpdateAllUsers(users: Seq[UserWithGroup]) extends Action
 case class ObtainUserGroupFromExternalId(id: String) extends Action
 case class UpdateUserGroup(id: String, userGroup: Option[Seq[UserGroup]]) extends Action
+case class DeleteUser(id: String) extends Action
+case class CreateUser(externalId: String, path: String) extends Action
 // Handlers
 class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case RefreshUsers =>
       effectOnly(
         Effect(
-          AjaxClient[Api].getUsers().call()
+          AjaxClient[Api].getUsers().call
             .map(
               ud =>
                 UpdateAllUsers(
@@ -41,7 +43,14 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
         )
       )
     case UpdateAllUsers(users) =>
-      updated(Ready(Users(Map(users.map(uwg => uwg.user.externalId -> uwg): _*))))
+      updated(
+        Ready(
+          Users(
+            Map(
+              users.map(uwg => uwg.user.externalId -> uwg): _*)
+          )
+        )
+      )
     case ObtainUserGroupFromExternalId(id) =>
       effectOnly(
         Effect(
@@ -68,6 +77,31 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
                   u
               }
           }
+        )
+      )
+    case DeleteUser(id) =>
+      updated(
+        value.map(
+          potUser =>
+            Users(potUser.users - id)
+        ),
+        Effect(
+          AjaxClient[Api].deleteUser(id).call.map{
+            ud =>
+              UpdateAllUsers(
+                ud.map(
+                  UserWithGroup(_)
+                )
+              )
+          }
+        )
+      )
+    case CreateUser(externalId, path) =>
+      effectOnly(
+        Effect(
+          AjaxClient[Api].createUser(externalId, path).call.map(
+            _ => RefreshUsers
+          )
         )
       )
   }

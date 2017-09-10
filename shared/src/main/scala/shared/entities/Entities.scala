@@ -15,4 +15,7 @@ case class UserGroup(
     joined: String
 )
 
-
+case class CreateUserData(
+  externalId: String,
+  path: String
+)

@@ -1,4 +1,6 @@
-package client.components.mui.users
+package client.components.mui
+package users
+
 import chandu0101.scalajs.react.components.materialui.{MuiCard, MuiCardHeader, MuiCardText}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

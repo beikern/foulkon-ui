@@ -14,7 +14,7 @@ class ApiService (
 
   //TODO beikern this is another mock
 
-  val userDetailList =
+  var userDetailList =
     List(
       UserDetail(
         "id",
@@ -95,5 +95,24 @@ class ApiService (
   override def getUserGroups(id: String): Option[Seq[UserGroup]] = {
     println(s"llamada a getUserGroups(id: String) con id: $id")
     mockUserGroupMap.get(id)
+  }
+
+  override def deleteUser(id: String): Seq[UserDetail] = {
+    println(s"llamada a deleteUser con id $id")
+    userDetailList = userDetailList.filterNot(_.externalId == id)
+    println(s"lista devuelta a la UI ${userDetailList.mkString(", ")}")
+    userDetailList
+  }
+
+  override def createUser(externalId: String, path: String): Seq[UserDetail] = {
+    userDetailList = userDetailList :+ UserDetail(
+      "id",
+      externalId,
+      path,
+      "tomocked",
+      "tomocked2.0",
+      "aunmasmocked"
+    )
+    userDetailList
   }
 }
