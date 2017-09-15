@@ -27,7 +27,7 @@ object UsersComponent {
   case class Props(proxy: ModelProxy[Pot[Users]])
   case class State(createUserDialogOpened: Boolean = false)
 
-  class Backend($: BackendScope[Props, State]) {
+  class Backend($ : BackendScope[Props, State]) {
     val changeCreateUserDialogStateCallback = (dialogState: Boolean) => {
       $.modState(s => s.copy(createUserDialogOpened = dialogState))
     }
@@ -48,13 +48,15 @@ object UsersComponent {
         ),
         p.proxy().renderFailed(ex => "Error loading"),
         p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy().render(
-          usersFromProxy => UserList(
-            usersFromProxy.users,
-            id => p.proxy.dispatchCB(ObtainUserGroupFromExternalId(id)),
-            id => p.proxy.dispatchCB(DeleteUser(id))
-          )
-        ),
+        p.proxy()
+          .render(
+            usersFromProxy =>
+              UserList(
+                usersFromProxy.users,
+                id => p.proxy.dispatchCB(ObtainUserGroupFromExternalId(id)),
+                id => p.proxy.dispatchCB(DeleteUser(id))
+            )
+          ),
         <.div(
           Style.createUserButton,
           MuiFloatingActionButton(onTouchTap = js.defined(showAreYouSureDialog _))(
@@ -65,7 +67,8 @@ object UsersComponent {
     }
   }
 
-  val component = ScalaComponent.builder[Props]("Users")
+  val component = ScalaComponent
+    .builder[Props]("Users")
     .initialState(State())
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.props))

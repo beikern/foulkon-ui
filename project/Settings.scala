@@ -42,7 +42,8 @@ object Settings {
     val chartjs = "2.1.3"
     val scalajsScripts = "1.1.1"
     val playJson = "2.6.0"
-
+    val Sttp = "0.0.14"
+    val circe = "0.8.0"
     // js dependencies
     val MuiVersion   = "0.17.0"
     val reactVersion = "15.4.2"
@@ -65,6 +66,10 @@ object Settings {
         "com.typesafe.play" %% "play-json" % versions.playJson,
         "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
         "org.webjars" % "bootstrap" % versions.bootstrap % Provided,
+        "io.circe" %% "circe-generic" % versions.circe,
+        "com.softwaremill.sttp" %% "core" % versions.Sttp,
+        "com.softwaremill.sttp" %% "akka-http-backend" % versions.Sttp,
+        "com.softwaremill.sttp" %% "circe" % versions.Sttp,
         "com.lihaoyi" %% "utest" % versions.uTest % Test
       ))
 
@@ -77,7 +82,8 @@ object Settings {
         "com.olvind" %%% "scalajs-react-components" % versions.scalajsReactComponents,
         "io.suzaku" %%% "diode" % versions.diode,
         "io.suzaku" %%% "diode-react" % versions.diode,
-        "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
+        "org.typelevel" %%% "cats-core" % "1.0.0-MF",
+  "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
         "com.lihaoyi" %%% "utest" % versions.uTest % Test
       ))
 }

@@ -9,32 +9,27 @@ import scala.scalajs.js
 object AreYouSureDialog {
 
   case class Props(
-    entityIdToDelete: String,
-    dialogOpened: Boolean,
-    callbackToDelete: String => Callback,
-    changeDialogState: Boolean => Callback
+      entityIdToDelete: String,
+      dialogOpened: Boolean,
+      callbackToDelete: String => Callback,
+      changeDialogState: Boolean => Callback
   )
 
-  class Backend($: BackendScope[Props, Unit]) {
+  class Backend($ : BackendScope[Props, Unit]) {
 
     def render(p: Props) = {
 
-      def handleDialogCancel: TouchTapEvent => Callback = {
-        TouchTapEvent => Callback.info("Cancel clicked") >> p.changeDialogState(false)
+      def handleDialogCancel: TouchTapEvent => Callback = { TouchTapEvent =>
+        Callback.info("Cancel clicked") >> p.changeDialogState(false)
       }
-      def handleDialogSubmit: TouchTapEvent => Callback = {
-        TouchTapEvent => Callback.info("Submit clicked") >> p.callbackToDelete(p.entityIdToDelete) >> p.changeDialogState(false)
+      def handleDialogSubmit: TouchTapEvent => Callback = { TouchTapEvent =>
+        Callback.info("Submit clicked") >> p.callbackToDelete(p.entityIdToDelete) >> p.changeDialogState(false)
       }
 
       val actions: VdomNode = js
         .Array(
-          MuiFlatButton(key = "1",
-            label = "Cancel",
-            onTouchTap = handleDialogCancel)(),
-          MuiFlatButton(key = "2",
-            label = "Delete",
-            secondary = true,
-            onTouchTap = handleDialogSubmit)()
+          MuiFlatButton(key = "1", label = "Cancel", onTouchTap = handleDialogCancel)(),
+          MuiFlatButton(key = "2", label = "Delete", secondary = true, onTouchTap = handleDialogSubmit)()
         )
         .toVdomArray
 
@@ -51,12 +46,11 @@ object AreYouSureDialog {
     .renderBackend[Backend]
     .build
 
-
   def apply(
-    entityIdToDelete: String,
-    dialogOpened: Boolean,
-    callbackToDelete: String => Callback,
-    changeDialogState: Boolean => Callback
+      entityIdToDelete: String,
+      dialogOpened: Boolean,
+      callbackToDelete: String => Callback,
+      changeDialogState: Boolean => Callback
   ) = component(Props(entityIdToDelete, dialogOpened, callbackToDelete, changeDialogState))
 
 }

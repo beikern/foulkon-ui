@@ -8,25 +8,25 @@ import shared.entities.UserGroup
 
 object GroupCard {
   case class Props(
-    group:UserGroup
+      group: UserGroup
   )
-  val groupCard = ScalaComponent.builder[Props]("GroupCard")
-  .render_P(
-    p =>
-      MuiCard()(
-        MuiCardHeader(
-          title = <.span(<.b(s"${p.group.name}")).render
-        )(),
-        MuiCardText()(
-          <.div(
-            <.p(<.b("Organization: "), s"${p.group.org}"),
-            <.p(<.b("Joined: "), s"${p.group.joined}")
+  val groupCard = ScalaComponent
+    .builder[Props]("GroupCard")
+    .render_P(
+      p =>
+        MuiCard()(
+          MuiCardHeader(
+            title = <.span(<.b(s"${p.group.name}")).render
+          )(),
+          MuiCardText()(
+            <.div(
+              <.p(<.b("Organization: "), s"${p.group.org}"),
+              <.p(<.b("Joined: "), s"${p.group.joined}")
+            )
           )
-        )
       )
-  ).build
+    )
+    .build
 
   def apply(group: UserGroup) = groupCard(Props(group))
 }
-
-

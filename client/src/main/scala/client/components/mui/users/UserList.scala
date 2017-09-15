@@ -8,30 +8,34 @@ import japgolly.scalajs.react.vdom.html_<^._
 object UserList {
 
   case class Props(
-    users: Map[String, UserWithGroup],
-    updateGroup: String => Callback,
-    deleteUser: String => Callback
+      users: Map[String, UserWithGroup],
+      updateGroup: String => Callback,
+      deleteUser: String => Callback
   )
 
-  private val UserList = ScalaComponent.builder[Props]("UserList")
+  private val UserList = ScalaComponent
+    .builder[Props]("UserList")
     .render_P(
       p => {
-        <.div(p.users.map(
-          udwg =>
-            <.div(^.className := "card-padded",
-              UserCard(
-                udwg._2,
-                p.updateGroup,
-                p.deleteUser
-              )
+        <.div(
+          p.users
+            .map(
+              udwg =>
+                <.div(^.className := "card-padded",
+                      UserCard(
+                        udwg._2,
+                        p.updateGroup,
+                        p.deleteUser
+                      ))
             )
-        ).toTagMod)
+            .toTagMod)
       }
-    ).build
+    )
+    .build
 
   def apply(
-    users: Map[String, UserWithGroup],
-    updateGroup: String => Callback,
-    deleteUser: String => Callback
+      users: Map[String, UserWithGroup],
+      updateGroup: String => Callback,
+      deleteUser: String => Callback
   ) = UserList(Props(users, updateGroup, deleteUser))
 }

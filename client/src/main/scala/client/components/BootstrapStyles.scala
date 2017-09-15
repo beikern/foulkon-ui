@@ -42,32 +42,32 @@ class BootstrapStyles(implicit r: Register) extends StyleSheet.Inline()(r) {
 
   // wrap styles in a namespace, assign to val to prevent lazy initialization
   object modal {
-    val modal = styleWrap("modal")
-    val fade = styleWrap("fade")
-    val dialog = styleWrap("modal-dialog")
+    val modal   = styleWrap("modal")
+    val fade    = styleWrap("fade")
+    val dialog  = styleWrap("modal-dialog")
     val content = styleWrap("modal-content")
-    val header = styleWrap("modal-header")
-    val body = styleWrap("modal-body")
-    val footer = styleWrap("modal-footer")
+    val header  = styleWrap("modal-header")
+    val body    = styleWrap("modal-body")
+    val footer  = styleWrap("modal-footer")
   }
 
   val _modal = modal
 
   object listGroup {
     val listGroup = styleWrap("list-group")
-    val item = styleWrap("list-group-item")
-    val itemOpt = commonStyle(contextDomain, "list-group-item")
+    val item      = styleWrap("list-group-item")
+    val itemOpt   = commonStyle(contextDomain, "list-group-item")
   }
 
-  val _listGroup = listGroup
+  val _listGroup        = listGroup
   val pullRight: StyleA = styleWrap("pull-right")
-  val buttonXS = styleWrap("btn-xs")
-  val close = styleWrap("close")
+  val buttonXS          = styleWrap("btn-xs")
+  val close             = styleWrap("close")
 
   val labelAsBadge = style(addClassName("label-as-badge"), borderRadius(1.em))
 
   val navbar = styleWrap("nav", "navbar-nav")
 
-  val formGroup = styleWrap("form-group")
+  val formGroup   = styleWrap("form-group")
   val formControl = styleWrap("form-control")
 }

@@ -5,8 +5,8 @@ import scala.language.implicitConversions
 import scala.scalajs.js
 
 /**
- * Common Bootstrap components for scalajs-react
- */
+  * Common Bootstrap components for scalajs-react
+  */
 object Bootstrap {
 
   // shorthand for styles
@@ -14,7 +14,7 @@ object Bootstrap {
 
   @js.native
   trait BootstrapJQuery extends JQuery {
-    def modal(action: String): BootstrapJQuery = js.native
+    def modal(action: String): BootstrapJQuery  = js.native
     def modal(options: js.Any): BootstrapJQuery = js.native
   }
 

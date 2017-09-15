@@ -30,7 +30,7 @@ object CountAndFilterToolBar {
               MuiMenuItem(value = "2", primaryText = js.defined("About"))()
             )
           )
-        )
+      )
     )
     .build
 

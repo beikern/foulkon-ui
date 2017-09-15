@@ -13,7 +13,6 @@ import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.GlobalRegistry
 
-
 @JSExportTopLevel("SPAMain")
 object SPAMain extends JSApp {
 

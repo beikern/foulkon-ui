@@ -1,7 +1,17 @@
 package client.components.mui
 package users
 
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import chandu0101.scalajs.react.components.materialui.{
+  Mui,
+  MuiCard,
+  MuiCardActions,
+  MuiCardHeader,
+  MuiCardText,
+  MuiDivider,
+  MuiFlatButton,
+  MuiGridList,
+  MuiIconButton
+}
 import client.appstate.UserWithGroup
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -22,23 +32,23 @@ object UserCard {
   }
 
   case class Props(
-    userData: UserWithGroup,
-    updateGroup: String => Callback,
-    deleteUser: String => Callback
+      userData: UserWithGroup,
+      updateGroup: String => Callback,
+      deleteUser: String => Callback
   )
 
   case class State(
-    groupExpanded: Boolean = false,
-    deleteDialogOpened: Boolean = false
+      groupExpanded: Boolean = false,
+      deleteDialogOpened: Boolean = false
   )
 
-  class Backend($: BackendScope[Props, State]) {
+  class Backend($ : BackendScope[Props, State]) {
     val changeDeleteUserDialogStateCallback = (dialogState: Boolean) => {
       $.modState(s => s.copy(deleteDialogOpened = dialogState))
     }
 
     def toggleGroup(updateGroup: Callback, groupExpanded: Boolean)(event: ReactEvent): Callback = {
-      if(!groupExpanded){
+      if (!groupExpanded) {
         updateGroup >> $.modState(s => s.copy(groupExpanded = !s.groupExpanded))
       } else {
         $.modState(s => s.copy(groupExpanded = !s.groupExpanded))
@@ -48,12 +58,11 @@ object UserCard {
       $.modState(s => s.copy(deleteDialogOpened = true))
     }
 
-    def render(p: Props, s:State) = {
+    def render(p: Props, s: State) = {
       val groupToRender = p.userData.group match {
         case Some(groups) =>
           groups.map(
-            group =>
-              GroupCard(group):VdomNode
+            group => GroupCard(group): VdomNode
           )
         case None =>
           List(<.p(""): VdomNode)
@@ -70,32 +79,29 @@ object UserCard {
 //        <.p(""): VdomNode
 
       <.div(
-        AreYouSureDialog(
-          p.userData.user.externalId,
-          s.deleteDialogOpened,
-          p.deleteUser,
-          changeDeleteUserDialogStateCallback)()
-        ,
+        AreYouSureDialog(p.userData.user.externalId, s.deleteDialogOpened, p.deleteUser, changeDeleteUserDialogStateCallback)(),
         MuiCard(expanded = js.defined(s.groupExpanded))(
-          <.div(MuiGridList(cellHeight = js.defined(50))(
-            MuiCardHeader(
-              title = <.span(<.b(s"${p.userData.user.externalId}")).render
-            )(),
-            <.div(Style.editDeleteButton,
-              MuiIconButton()(
-                Mui.SvgIcons.EditorModeEdit.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
-              ),
-              MuiIconButton(
-                onClick = js.defined(showAreYouSureDialog _)
-              )(
-                Mui.SvgIcons.ActionDelete.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+          <.div(
+            MuiGridList(cellHeight = js.defined(50))(
+              MuiCardHeader(
+                title = <.span(<.b(s"${p.userData.user.externalId}")).render
+              )(),
+              <.div(
+                Style.editDeleteButton,
+                MuiIconButton()(
+                  Mui.SvgIcons.EditorModeEdit.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+                ),
+                MuiIconButton(
+                  onClick = js.defined(showAreYouSureDialog _)
+                )(
+                  Mui.SvgIcons.ActionDelete.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+                )
               )
-            )
-          )),
+            )),
           MuiCardText()(
             <.div(
               <.p(<.b("Path: "), s"${p.userData.user.path}"),
-              <.p(<.b("Created at: "),s"${p.userData.user.createdAt}"),
+              <.p(<.b("Created at: "), s"${p.userData.user.createdAt}"),
               <.p(<.b("Updated at: "), s"${p.userData.user.updatedAt}"),
               <.p(<.b("Urn: "), s"${p.userData.user.urn}")
             )
@@ -110,7 +116,7 @@ object UserCard {
           ),
           MuiCardText(expandable = js.defined(true))(
             MuiGridList(cols = js.defined(2), padding = js.defined(8))(
-              groupToRender:_ *
+              groupToRender: _*
             )
           )
         )
@@ -118,12 +124,12 @@ object UserCard {
     }
   }
 
-  val component = ScalaComponent.builder[Props]("UserCard")
+  val component = ScalaComponent
+    .builder[Props]("UserCard")
     .initialState(State())
     .renderBackend[Backend]
     .build
 
-  def apply(userData: UserWithGroup,
-            updateGroup: String => Callback,
-            deleteUser: String => Callback) = component(Props(userData, updateGroup, deleteUser))
+  def apply(userData: UserWithGroup, updateGroup: String => Callback, deleteUser: String => Callback) =
+    component(Props(userData, updateGroup, deleteUser))
 }
