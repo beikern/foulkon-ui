@@ -8,12 +8,13 @@ import shared.entities.{UserDetail, UserGroup}
 import shared.FoulkonError
 import client.services.AjaxClient
 import shared.Api
+import cats.syntax.either._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import boopickle.Default._
 import diode.ActionResult.ModelUpdate
 import diode.react.ReactConnector
-import shared.responses.FoulkonErrorFromJson
+import shared.responses.UserDeleteResponse
 
 import scala.concurrent.Future
 
@@ -23,14 +24,14 @@ case class UserWithGroup(
 )
 
 // Actions
-case object RefreshUsers                                                  extends Action
-case class UpdateAllUsers(users: Seq[UserWithGroup])                      extends Action
-case class ObtainUserGroupFromExternalId(id: String)                      extends Action
-case class UpdateUserGroup(id: String, userGroup: Option[Seq[UserGroup]]) extends Action
-case class DeleteUser(id: String)                                         extends Action
-case class CreateUser(externalId: String, path: String)                   extends Action
+case object RefreshUsers                                                                extends Action
+case class UpdateAllUsers(users: Either[FoulkonError, List[UserWithGroup]])             extends Action
+case class ObtainUserGroupFromExternalId(id: String)                                    extends Action
+case class UpdateUserGroup(id: String, userGroup: Option[Seq[UserGroup]])               extends Action
+case class DeleteUser(id: String)                                                       extends Action
+case class CreateUser(externalId: String, path: String)                                 extends Action
 case class UpdateUserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case object RemoveUserFeedbackReporting extends Action
+case object RemoveUserFeedbackReporting                                                 extends Action
 
 // Handlers
 class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(modelRW) {
@@ -42,20 +43,23 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
             .getUsers()
             .call
             .map(
-              ud =>
+              userDetailEither =>
                 UpdateAllUsers(
-                  ud.map(
-                    UserWithGroup(_)
-                  )
+                  userDetailEither.map { userDetailList =>
+                    userDetailList.map(UserWithGroup(_))
+                  }
               )
             )
         )
       )
-    case UpdateAllUsers(users) =>
+    case UpdateAllUsers(usersEither) =>
+      println(usersEither)
       updated(
         Ready(
           Users(
-            Map(users.map(uwg => uwg.user.externalId -> uwg): _*)
+            usersEither.map { users =>
+              Map(users.map(uwg => uwg.user.externalId -> uwg): _*)
+            }
           )
         )
       )
@@ -70,36 +74,31 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
             )
         )
       )
-    case UpdateUserGroup(id, userGroup) =>
-      println("llega a updateusergroup")
+    case UpdateUserGroup(id, userGroup) => // TODO beikern => ñapa, deshacer
       ModelUpdate(
         modelRW.updated(
-          modelRW.value.map { u =>
-            println(s"los users => ${u.users}")
-            u.users.get(id).map(_.copy(group = userGroup)) match {
-              case Some(uwg) =>
-                println("dentro de some")
-                Users(u.users.updated(id, uwg))
-              case None =>
-                println("dentro de none")
-                u
-            }
+          modelRW.value.map { userModel =>
+            Users(userModel.users.map { userMap =>
+              userMap.get(id).map(_.copy(group = userGroup)) match {
+                case Some(uwg) =>
+                  userMap.updated(id, uwg)
+                case None =>
+                  userMap
+              }
+            })
           }
         )
       )
-    case DeleteUser(id) =>
-      updated(
-        value.map(
-          potUser => Users(potUser.users - id)
-        ),
+    case DeleteUser(externalId) =>
+      effectOnly(
         Effect(
-          AjaxClient[Api].deleteUser(id).call.map { ud =>
-            UpdateAllUsers(
-              ud.map(
-                UserWithGroup(_)
-              )
-            )
-          }
+          AjaxClient[Api]
+            .deleteUser(externalId)
+            .call
+            .map {
+              case Left(foulkonError)             => UpdateUserFeedbackReporting(Left(foulkonError))
+              case Right(UserDeleteResponse(eId)) => UpdateUserFeedbackReporting(Right(s"User $eId deleted successfully!"))
+            }
         )
       )
     case CreateUser(externalId, path) =>
@@ -109,7 +108,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
             .createUser(externalId, path)
             .call
             .map {
-              case Left(foulkonError) => UpdateUserFeedbackReporting(Left(foulkonError))
+              case Left(foulkonError)                    => UpdateUserFeedbackReporting(Left(foulkonError))
               case Right(UserDetail(_, eId, _, _, _, _)) => UpdateUserFeedbackReporting(Right(s"User $eId created successfully!"))
             }
         )
@@ -120,9 +119,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
 class UserFeedbackHandler[M](modelRW: ModelRW[M, Option[UserFeedbackReporting]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case UpdateUserFeedbackReporting(feedback) =>
-      updated(
-        Some(UserFeedbackReporting(feedback))
-      , Effect(Future(RefreshUsers)))
+      updated(Some(UserFeedbackReporting(feedback)), Effect(Future(RefreshUsers)))
     case RemoveUserFeedbackReporting =>
       updated(
         None
@@ -135,7 +132,7 @@ case class UserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]
 // The Root model for the application
 case class UserModule(users: Pot[Users], feedbackReporting: Option[UserFeedbackReporting])
 case class RootModel(userModule: UserModule)
-case class Users(users: Map[String, UserWithGroup])
+case class Users(users: Either[FoulkonError, Map[String, UserWithGroup]])
 
 // Application circuit
 object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
@@ -146,6 +143,3 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
     new UserFeedbackHandler(zoomRW(_.userModule.feedbackReporting)((m, v) => m.copy(userModule = m.userModule.copy(feedbackReporting = v))))
   )
 }
-
-
-

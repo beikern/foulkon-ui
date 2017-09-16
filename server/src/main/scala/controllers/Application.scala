@@ -9,6 +9,7 @@ import play.api.mvc.{Action, InjectedController, RawBuffer}
 import services.ApiService
 import boopickle.Default._
 import com.google.inject.Inject
+import contexts.AkkaContext
 import shared.Api
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,7 +32,7 @@ class Application @Inject()(
     implicit val config: Configuration,
     env: Environment,
     implicit val actorSystem: ActorSystem
-) extends InjectedController {
+) extends InjectedController with AkkaContext{
 
   val apiService = new ApiService()
 
