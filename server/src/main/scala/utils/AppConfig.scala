@@ -11,7 +11,7 @@ object AppConfig {
     val foulkonUser: String = foulkonConfig.getString("user.id")
     val foulkonPassword: String = foulkonConfig.getString("user.password")
 
-    val foulkonHost: String = foulkonConfig.getString("adress.host")
-    val foulkonPort: Int = foulkonConfig.getInt("adress.port")
+    val foulkonHost: String = foulkonConfig.getString("address.host")
+    val foulkonPort: Int = foulkonConfig.getInt("address.port")
   }
 }
