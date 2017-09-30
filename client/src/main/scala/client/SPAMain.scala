@@ -2,6 +2,7 @@ package client
 
 import client.components.GlobalStyles
 import client.components.internal.ReactTapEventPlugin
+import client.components.mui.groups.{GroupCard, GroupsComponent}
 import client.components.mui.users.{UserCard, UsersComponent}
 import japgolly.scalajs.react.extra.router._
 import org.scalajs.dom
@@ -25,6 +26,10 @@ object SPAMain extends JSApp {
     // create stylesheet
     GlobalRegistry.register(UserCard.Style) // TODO beikern: move to a loader method like scala-react-components does.
     GlobalRegistry.register(UsersComponent.Style)
+
+    GlobalRegistry.register(GroupCard.Style)
+    GlobalRegistry.register(GroupsComponent.Style)
+
     GlobalRegistry.addToDocumentOnRegistration()
 
     GlobalStyles.addToDocument()

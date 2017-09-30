@@ -12,8 +12,6 @@ import com.google.inject.Inject
 import contexts.AkkaContext
 import shared.Api
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
   override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
   override def write[R: Pickler](r: R)         = Pickle.intoBytes(r)
@@ -32,7 +30,8 @@ class Application @Inject()(
     implicit val config: Configuration,
     env: Environment,
     implicit val actorSystem: ActorSystem
-) extends InjectedController with AkkaContext{
+) extends InjectedController
+    with AkkaContext {
 
   val apiService = new ApiService()
 

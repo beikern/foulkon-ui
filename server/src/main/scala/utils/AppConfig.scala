@@ -8,10 +8,10 @@ object AppConfig {
   object FoulkonConfig {
     private lazy val foulkonConfig = config.getConfig("app.foulkon")
 
-    val foulkonUser: String = foulkonConfig.getString("user.id")
+    val foulkonUser: String     = foulkonConfig.getString("user.id")
     val foulkonPassword: String = foulkonConfig.getString("user.password")
 
     val foulkonHost: String = foulkonConfig.getString("address.host")
-    val foulkonPort: Int = foulkonConfig.getInt("address.port")
+    val foulkonPort: Int    = foulkonConfig.getInt("address.port")
   }
 }

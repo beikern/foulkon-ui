@@ -1,15 +1,15 @@
 package client.components.mui.users
 
-import java.util.regex.Pattern
-
 import chandu0101.scalajs.react.components.materialui.{MuiDialog, MuiFlatButton, MuiTextField, TouchTapEvent}
+import client.components.utils.FoulkonMaxLengths._
+import client.components.utils.FoulkonRegexPatterns._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, _}
 import shared.entities.CreateUserData
 
 import scala.scalajs.js
 
-object CreateUserForm {
+object CreateUserDialog {
 
   case class Props(
       dialogOpened: Boolean,
@@ -25,12 +25,6 @@ object CreateUserForm {
       pathErrorText: js.UndefOr[VdomNode] = js.undefined,
       pathValue: Option[String] = None
   )
-
-  val externalIdPattern: Pattern = "^[\\w+.@=\\-_]+$".r.pattern
-  val externalIdMaxLength        = 128
-
-  val pathPattern: Pattern = "^/$|^/[\\w+/\\-_]+\\w+/$".r.pattern
-  val pathMaxLength        = 512
 
   class Backend($ : BackendScope[Props, State]) {
 
@@ -143,7 +137,7 @@ object CreateUserForm {
         .toVdomArray
 
       MuiDialog(
-        title = js.defined(s"Creating user"),
+        title = js.defined(s"Create user"),
         actions = actions,
         open = p.dialogOpened
       )(

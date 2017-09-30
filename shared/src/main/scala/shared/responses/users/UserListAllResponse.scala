@@ -1,4 +1,6 @@
-package shared.responses
+package shared.responses.users
+
+import shared.responses.PaginatedResponse
 
 case class UserListAllResponse(
     users: List[String],

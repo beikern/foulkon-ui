@@ -9,29 +9,30 @@ import shared.FoulkonError
 object UserList {
 
   case class Props(
-                    usersEither: Either[FoulkonError, Map[String, UserWithGroup]],
-                    updateGroup: String => Callback,
-                    deleteUser: String => Callback
+      usersEither: Either[FoulkonError, Map[String, UserWithGroup]],
+      updateGroup: String => Callback,
+      deleteUser: String => Callback
   )
 
   private val UserList = ScalaComponent
     .builder[Props]("UserList")
     .render_P(
       p => {
-        <.div(
-          p.usersEither match {
-            case Right(users) =>
-              users.map(
+        <.div(p.usersEither match {
+          case Right(users) =>
+            users
+              .map(
                 udwg =>
                   <.div(^.className := "card-padded",
-                    UserCard(
-                      udwg._2,
-                      p.updateGroup,
-                      p.deleteUser
-                    ))
-              ).toTagMod
-            case Left(error) =>  <.div(error.toString) // TODO jcolomer arreglar, mostrar una card de error
-          })
+                        UserCard(
+                          udwg._2,
+                          p.updateGroup,
+                          p.deleteUser
+                        ))
+              )
+              .toTagMod
+          case Left(error) => <.div(error.toString) // TODO jcolomer arreglar, mostrar una card de error
+        })
       }
     )
     .build

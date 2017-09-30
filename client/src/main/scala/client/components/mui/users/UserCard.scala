@@ -60,12 +60,12 @@ object UserCard {
 
     def render(p: Props, s: State) = {
       val groupToRender = p.userData.group match {
-        case Some(groups) =>
+        case Right(groups) =>
           groups.map(
             group => GroupCard(group): VdomNode
           )
-        case None =>
-          List(<.p(""): VdomNode)
+        case Left(error) =>
+          List(<.p(s"Error retrieving groups: $error"): VdomNode)
       }
 
 // THIS WORKS TOO, just remove the variadic conversion

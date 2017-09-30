@@ -1,10 +1,11 @@
 package clients
+
 import io.circe.generic.auto._
-import shared.requests.CreateUserRequest
-import shared.responses.{UserDeleteResponse, UserDetailResponse, UserListAllResponse}
 import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp.{sttp, _}
 import contexts.AkkaContext
+import shared.requests.users._
+import shared.responses.users._
 
 trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
 
@@ -15,7 +16,6 @@ trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
       .auth
       .basic(foulkonUser, foulkonPassword)
       .response(asJson[UserListAllResponse])
-
 
   val userDetailRequest =
     (externalId: String) =>
@@ -30,7 +30,7 @@ trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
     (externalId: String, path: String) =>
       sttp
         .body(
-          CreateUserRequest(
+          CreateUserRequestBody(
             externalId,
             path
           ))
@@ -48,4 +48,13 @@ trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
         .auth
         .basic(foulkonUser, foulkonPassword)
         .mapResponse(_ => UserDeleteResponse(externalId))
+
+  val getUserGroupRequest =
+    (externalId: String) =>
+      sttp
+        .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users/$externalId/groups?Limit=1000")
+        .contentType("application/json")
+        .auth
+        .basic(foulkonUser, foulkonPassword)
+        .response(asJson[UserGroupResponse])
 }

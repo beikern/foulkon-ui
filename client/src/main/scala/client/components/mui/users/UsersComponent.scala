@@ -41,7 +41,7 @@ object UsersComponent {
 
     def render(p: Props, s: State) = {
       <.div(
-        CreateUserForm(
+        CreateUserDialog(
           s.createUserDialogOpened,
           changeCreateUserDialogStateCallback,
           (externalId, path) => p.proxy.dispatchCB(CreateUser(externalId, path))

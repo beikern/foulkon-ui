@@ -1,13 +1,19 @@
 package client.routes
 
+import java.util.UUID
+
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
+import client.components.mui.groups.{GroupFeedbackSnackbar, GroupTabs}
 import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
 import client.components.mui.{CountAndFilterToolBar, NavToolBar}
+import japgolly.scalajs.react.extra.router.StaticDsl.Route
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 
 object AppRouter {
+
+  case class GroupUUID (id: UUID)
 
   sealed trait Location
 
@@ -17,14 +23,18 @@ object AppRouter {
   case object ProxyResourcesLocation extends Location
   case object OidcProviderLocation   extends Location
   case object AuthoritationLocation  extends Location
+  case class GroupMembersLocation(id: UUID) extends Location
 
   // Configure the router
   val routerConfig: RouterConfig[Location] = RouterConfigDsl[Location]
     .buildConfig { dsl =>
       import dsl._
 
-      val userWrapper = SPACircuit.connect(_.userModule.users)
+      val userWrapper         = SPACircuit.connect(_.userModule.users)
       val userFeedbackWrapper = SPACircuit.connect(_.userModule.feedbackReporting)
+
+      val groupWrapper         = SPACircuit.connect(_.groupModule)
+      val groupFeedbackWrapper = SPACircuit.connect(_.groupModule.feedbackReporting)
 
       val usersRoute: Rule =
         staticRoute("#users", UsersLocation) ~>
@@ -42,7 +52,9 @@ object AppRouter {
           renderR(
             ctl =>
               <.div(
-                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Groups", 1)))
+                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Groups", 1))),
+                MuiMuiThemeProvider()(groupWrapper(GroupTabs(_))),
+                MuiMuiThemeProvider()(groupFeedbackWrapper(GroupFeedbackSnackbar(_)))
             )
           )
 
@@ -55,9 +67,12 @@ object AppRouter {
             )
           )
 
+//      val test = dynamicRouteCT("groups" / uuid.caseClass[GroupMembersLocation] / "members")
+
       (usersRoute
-        | groupsRoute
-        | policiesRoute).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
+          | groupsRoute
+          | policiesRoute
+      ).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
     }
     .renderWith(layout)
 

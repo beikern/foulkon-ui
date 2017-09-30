@@ -1,4 +1,4 @@
-package shared.responses
+package shared.responses.users
 
 case class UserDetailResponse(
     id: String,
