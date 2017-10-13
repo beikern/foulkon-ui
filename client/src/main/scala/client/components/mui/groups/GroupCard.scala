@@ -1,9 +1,13 @@
 package client
 package components.mui.groups
 
+import java.util.UUID
+
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiGridList, MuiIconButton}
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import client.routes.AppRouter.{GroupMembersLocation, Location}
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.GroupDetail
 
@@ -24,8 +28,10 @@ object GroupCard {
 
   case class Props(
     groupDetail: GroupDetail,
+    router: RouterCtl[Location],
     updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-    deleteGroup: (GroupOrg, GroupName) => Callback
+    deleteGroup: (GroupOrg, GroupName) => Callback,
+    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
   )
 
   case class State(
@@ -94,6 +100,15 @@ object GroupCard {
               <.p(<.b("urn: "), s"${p.groupDetail.org}"),
               <.p(<.b("org: "), s"${p.groupDetail.org}")
             )
+          ),
+          MuiDivider()(),
+          MuiCardActions()(
+            MuiFlatButton(
+              primary = js.defined(true),
+              label = js.defined("members"),
+              href = js.defined(p.router.urlFor(GroupMembersLocation(UUID.fromString(p.groupDetail.id))).value),
+              onClick = js.defined((_) => p.retrieveGroupMemberInfoCallback(p.groupDetail.id, p.groupDetail.org, p.groupDetail.name))
+            )()
           )
         )
       )
@@ -106,6 +121,20 @@ object GroupCard {
     .renderBackend[Backend]
     .build
 
-  def apply(groupDetail: GroupDetail, updateGroup: (GroupOrg, GroupName, GroupName, GroupPath) => Callback, deleteGroup: (GroupOrg, GroupName) => Callback) =
-    component(Props(groupDetail, updateGroup, deleteGroup))
+  def apply(
+    groupDetail: GroupDetail,
+    router: RouterCtl[Location],
+    updateGroup: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
+    deleteGroup: (GroupOrg, GroupName) => Callback,
+    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+  ) =
+    component(
+      Props(
+        groupDetail,
+        router,
+        updateGroup,
+        deleteGroup,
+        retrieveGroupMemberInfoCallback
+      )
+    )
 }

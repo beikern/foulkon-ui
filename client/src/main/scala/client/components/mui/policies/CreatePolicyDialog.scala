@@ -1,22 +1,19 @@
-package client
-package components.mui.groups
+package client.components.mui.policies
 
-import chandu0101.scalajs.react.components.materialui.{MuiDialog, MuiFlatButton, MuiTextField, TouchTapEvent}
+import chandu0101.scalajs.react.components.materialui.{MuiDialog, MuiDivider, MuiFlatButton, MuiTextField, TouchTapEvent}
+import client.components.utils.FoulkonMaxLengths._
+import client.components.utils.FoulkonRegexPatterns._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, _}
-import shared.entities.CreateGroupData
-import client.components.utils.FoulkonRegexPatterns._
-import client.components.utils.FoulkonMaxLengths._
+import shared.entities.CreatePolicyData
 
 import scala.scalajs.js
 
-object CreateGroupDialog {
+object CreatePolicyDialog {
 
   case class Props(
       dialogOpened: Boolean,
-      organizations: List[String],
-      changeDialogState: Boolean => Callback,
-      createGroupCallback: (GroupOrg, GroupName, GroupPath) => Callback
+      changeDialogState: Boolean => Callback
   )
   case class State(
       inputValidated: Boolean = false,
@@ -162,7 +159,7 @@ object CreateGroupDialog {
           nv <- s.nameValue
           pv <- s.pathValue
         } yield {
-          CreateGroupData(
+          CreatePolicyData(
             ov,
             nv,
             pv
@@ -170,8 +167,8 @@ object CreateGroupDialog {
         }
 
         createGroupData match {
-          case Some(groupData) =>
-            p.changeDialogState(false) >> p.createGroupCallback(groupData.organizationId, groupData.name, groupData.path) >> $.setState(State())
+          case Some(policyData) =>
+            p.changeDialogState(false) >> Callback.empty >> $.setState(State())
           case None =>
             Callback.log(s"Something failed, the group was no created, wooops!") >> p.changeDialogState(false) >> $.setState(State())
         }
@@ -184,9 +181,10 @@ object CreateGroupDialog {
         .toVdomArray
 
       MuiDialog(
-        title = js.defined(s"Create group"),
+        title = js.defined(s"Create policy"),
         actions = actions,
-        open = p.dialogOpened
+        open = p.dialogOpened,
+        autoScrollBodyContent = js.defined(true)
       )(
         <.div(
           MuiTextField(
@@ -208,22 +206,23 @@ object CreateGroupDialog {
             onChange = js.defined(pathValidationCallback),
             errorText = s.pathErrorText
           )()
-        )
+        ),
+        <.div("Statements"),
+        StatementCard(),
+        MuiFlatButton(primary = js.defined(true), label = js.defined("add another statement"))()
       )
     }
   }
 
   val component = ScalaComponent
-    .builder[Props]("CreateGroupDialog")
+    .builder[Props]("CreatePolicyDialog")
     .initialState(State())
     .renderBackend[Backend]
     .build
 
   def apply(
-      dialogOpened: Boolean,
-      organizations: List[String],
-      changeDialogState: Boolean => Callback,
-      createGroupCallback: (GroupOrg, GroupName, GroupPath) => Callback
-  ) = component(Props(dialogOpened, organizations, changeDialogState, createGroupCallback))
+    dialogOpened: Boolean,
+    changeDialogState: Boolean => Callback
+  ) = component(Props(dialogOpened, changeDialogState))
 
 }

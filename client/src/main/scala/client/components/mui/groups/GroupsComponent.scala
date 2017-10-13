@@ -4,10 +4,12 @@ package components.mui.groups
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
 import client.appstate._
+import client.routes.AppRouter.Location
 import diode.data.Pot
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 
 import scala.scalajs.js
@@ -24,7 +26,7 @@ object GroupsComponent {
     )
   }
 
-  case class Props(proxy: ModelProxy[Pot[Groups]])
+  case class Props(proxy: ModelProxy[Pot[Groups]], router: RouterCtl[Location])
   case class State(createGroupDialogOpened: Boolean = false)
 
   class Backend($ : BackendScope[Props, State]) {
@@ -32,7 +34,7 @@ object GroupsComponent {
       $.modState(s => s.copy(createGroupDialogOpened = dialogState))
     }
 
-    def showAreYouSureDialog(event: ReactEvent): Callback = {
+    def showCreateGroupDialogCallback(event: ReactEvent): Callback = {
       $.modState(s => s.copy(createGroupDialogOpened = true))
     }
 
@@ -54,13 +56,15 @@ object GroupsComponent {
             groupsFromProxy =>
               GroupList(
                 groupsFromProxy.groups,
+                p.router,
                 (groupOrg, actualGroupName, updatedGroupName, updatedGroupPath) => p.proxy.dispatchCB(UpdateGroup(groupOrg, actualGroupName, updatedGroupName, updatedGroupPath)),
-                (groupOrg, groupName) => p.proxy.dispatchCB(DeleteGroup(groupOrg, groupName))
+                (groupOrg, groupName) => p.proxy.dispatchCB(DeleteGroup(groupOrg, groupName)),
+                (id, groupOrg, groupName) => p.proxy.dispatchCB(RetrieveGroupMemberInfo(id, groupOrg, groupName))
             )
           ),
         <.div(
           Style.createGroupButton,
-          MuiFloatingActionButton(onTouchTap = js.defined(showAreYouSureDialog _))(
+          MuiFloatingActionButton(onTouchTap = js.defined(showCreateGroupDialogCallback _))(
             Mui.SvgIcons.ContentAdd.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
           )
         )
@@ -75,6 +79,6 @@ object GroupsComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(proxy: ModelProxy[Pot[Groups]]) = component(Props(proxy))
+  def apply(proxy: ModelProxy[Pot[Groups]], router: RouterCtl[Location]) = component(Props(proxy, router))
 
 }

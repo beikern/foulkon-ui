@@ -1,7 +1,9 @@
 package client
 package components.mui.groups
 
+import client.routes.AppRouter.Location
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.FoulkonError
 import shared.entities.GroupDetail
@@ -10,8 +12,10 @@ object GroupList {
 
   case class Props(
     groupsEither: Either[FoulkonError, List[GroupDetail]],
+    router: RouterCtl[Location],
     updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-    deleteGroupCallback: (GroupOrg, GroupName) => Callback
+    deleteGroupCallback: (GroupOrg, GroupName) => Callback,
+    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
   )
 
   private val GroupList = ScalaComponent
@@ -26,8 +30,10 @@ object GroupList {
                   <.div(^.className := "card-padded",
                         GroupCard(
                           group,
+                          p.router,
                           p.updateGroupCallback,
-                          p.deleteGroupCallback
+                          p.deleteGroupCallback,
+                          p.retrieveGroupMemberInfoCallback
                         ))
               )
               .toTagMod
@@ -38,7 +44,9 @@ object GroupList {
     .build
 
   def apply(groupsEither: Either[FoulkonError, List[GroupDetail]],
+            router: RouterCtl[Location],
             updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-            deleteGroupCallback: (GroupOrg, GroupName) => Callback
-           ) = GroupList(Props(groupsEither, updateGroupCallback, deleteGroupCallback))
+            deleteGroupCallback: (GroupOrg, GroupName) => Callback,
+            retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+           ) = GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback))
 }

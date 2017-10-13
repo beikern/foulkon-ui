@@ -2,7 +2,9 @@ package client
 
 import client.components.GlobalStyles
 import client.components.internal.ReactTapEventPlugin
+import client.components.mui.groups.members.{MemberCard, MembersComponent}
 import client.components.mui.groups.{GroupCard, GroupsComponent}
+import client.components.mui.policies.{PoliciesComponent, PolicyCard}
 import client.components.mui.users.{UserCard, UsersComponent}
 import japgolly.scalajs.react.extra.router._
 import org.scalajs.dom
@@ -29,6 +31,12 @@ object SPAMain extends JSApp {
 
     GlobalRegistry.register(GroupCard.Style)
     GlobalRegistry.register(GroupsComponent.Style)
+
+    GlobalRegistry.register(MemberCard.Style)
+    GlobalRegistry.register(MembersComponent.Style)
+
+    GlobalRegistry.register(PoliciesComponent.Style)
+    GlobalRegistry.register(PolicyCard.Style)
 
     GlobalRegistry.addToDocumentOnRegistration()
 

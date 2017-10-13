@@ -3,4 +3,5 @@ package object client {
   type GroupOrg        = String
   type GroupName       = String
   type GroupPath       = String
+  type UserId          = String
 }

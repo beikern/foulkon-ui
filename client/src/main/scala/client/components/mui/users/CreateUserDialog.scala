@@ -132,7 +132,7 @@ object CreateUserDialog {
       val actions: VdomNode = js
         .Array(
           MuiFlatButton(key = "1", label = "cancel", onTouchTap = handleDialogCancel)(),
-          MuiFlatButton(key = "2", label = "create", disabled = js.defined(!s.inputValidated), secondary = true, onTouchTap = handleDialogSubmit)()
+          MuiFlatButton(key = "2", label = "create", disabled = js.defined(!s.inputValidated), primary = true, onTouchTap = handleDialogSubmit)()
         )
         .toVdomArray
 

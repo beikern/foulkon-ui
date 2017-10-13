@@ -1,8 +1,9 @@
 package shared
 
-import shared.entities.{GroupDetail, UserDetail, UserGroup}
-import shared.requests.groups.{CreateGroupRequest, UpdateGroupRequest}
-import shared.responses.groups.GroupDeleteResponse
+import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
+import shared.requests.groups._
+import shared.requests.policies.CreatePolicyRequest
+import shared.responses.groups.{AddMemberGroupResponse, GroupDeleteResponse, MemberInfo, RemoveMemberGroupResponse}
 import shared.responses.users.UserDeleteResponse
 
 import scala.concurrent.Future
@@ -17,4 +18,9 @@ trait Api {
   def readGroups(): Future[Either[FoulkonError, List[GroupDetail]]]
   def updateGroup(request: UpdateGroupRequest): Future[Either[FoulkonError, GroupDetail]]
   def deleteGroup (organizationId: String, name: String): Future[Either[FoulkonError, GroupDeleteResponse]]
+  def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberInfo]]]
+  def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]]
+  def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]]
+  def readPolicies(): Future[Either[FoulkonError, List[PolicyDetail]]]
+  def createPolicy(request: CreatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]
 }

@@ -4,10 +4,11 @@ import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
-import client.components.mui.groups.{GroupFeedbackSnackbar, GroupTabs}
+import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
+import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
+import client.components.mui.policies.PoliciesComponent
 import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
 import client.components.mui.{CountAndFilterToolBar, NavToolBar}
-import japgolly.scalajs.react.extra.router.StaticDsl.Route
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 
@@ -34,7 +35,12 @@ object AppRouter {
       val userFeedbackWrapper = SPACircuit.connect(_.userModule.feedbackReporting)
 
       val groupWrapper         = SPACircuit.connect(_.groupModule)
-      val groupFeedbackWrapper = SPACircuit.connect(_.groupModule.feedbackReporting)
+      val groupFeedbackWrapper = SPACircuit.connect(_.groupModule.groupFeedbackReporting)
+
+      val groupMemberWrapper = SPACircuit.connect(_.groupModule.members)
+      val groupMemberFeedbackWrapper = SPACircuit.connect(_.groupModule.groupMemberFeedbackReporting)
+
+      val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
 
       val usersRoute: Rule =
         staticRoute("#users", UsersLocation) ~>
@@ -53,7 +59,7 @@ object AppRouter {
             ctl =>
               <.div(
                 MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Groups", 1))),
-                MuiMuiThemeProvider()(groupWrapper(GroupTabs(_))),
+                MuiMuiThemeProvider()(groupWrapper(groupModule => GroupsComponent(groupModule.zoom(_.groups), ctl))),
                 MuiMuiThemeProvider()(groupFeedbackWrapper(GroupFeedbackSnackbar(_)))
             )
           )
@@ -63,14 +69,26 @@ object AppRouter {
           renderR(
             ctl =>
               <.div(
-                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1)))
+                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
+                  MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl)))
             )
           )
 
-//      val test = dynamicRouteCT("groups" / uuid.caseClass[GroupMembersLocation] / "members")
+      val groupMembersRoute: Rule = dynamicRouteCT("#groups" / uuid.caseClass[GroupMembersLocation] / "members") ~>
+        dynRenderR(
+          (p: GroupMembersLocation, ctl) =>
+            <.div(
+              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Members", 1))),
+              MuiMuiThemeProvider()(groupMemberWrapper(groupMetadataWithMember => MembersComponent(p.id.toString, groupMetadataWithMember, ctl))),
+              MuiMuiThemeProvider()(groupMemberFeedbackWrapper(GroupMemberFeedbackSnackbar(_)))
+            )
 
-      (usersRoute
+        )
+
+      (emptyRule
+          |usersRoute
           | groupsRoute
+          | groupMembersRoute
           | policiesRoute
       ).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
     }
