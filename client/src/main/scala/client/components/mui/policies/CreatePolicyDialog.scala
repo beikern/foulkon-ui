@@ -207,7 +207,6 @@ object CreatePolicyDialog {
             errorText = s.pathErrorText
           )()
         ),
-        <.div("Statements"),
         StatementCard(),
         MuiFlatButton(primary = js.defined(true), label = js.defined("add another statement"))()
       )

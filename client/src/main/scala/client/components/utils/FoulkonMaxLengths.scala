@@ -5,4 +5,5 @@ object FoulkonMaxLengths {
   val nameMaxLength        = 128
   val pathMaxLength        = 512
   val externalIdMaxLength        = 128
+  val actionMaxLength = 128
 }

@@ -18,9 +18,21 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 }
 
 object TwirlTemplate {
-  def bundleUrl(projectName: String): Option[String] = {
+  def libraryUrl(projectName: String): Option[String] = {
     val name = projectName.toLowerCase
-    Seq(s"$name-opt-bundle.js", s"$name-fastopt-bundle.js")
+    Seq(s"$name-opt-library.js", s"$name-fastopt-library.js")
+      .find(name => getClass.getResource(s"/public/$name") != null)
+      .map(controllers.routes.Assets.versioned(_).url)
+  }
+  def loaderUrl(projectName: String): Option[String] = {
+    val name = projectName.toLowerCase
+    Seq(s"$name-opt-loader.js", s"$name-fastopt-loader.js")
+      .find(name => getClass.getResource(s"/public/$name") != null)
+      .map(controllers.routes.Assets.versioned(_).url)
+  }
+  def foulkonUIappUrl(projectName: String): Option[String] = {
+    val name = projectName.toLowerCase
+    Seq(s"$name-opt.js", s"$name-fastopt.js")
       .find(name => getClass.getResource(s"/public/$name") != null)
       .map(controllers.routes.Assets.versioned(_).url)
   }

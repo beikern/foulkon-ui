@@ -44,8 +44,8 @@ lazy val client: Project = (project in file("client"))
     webpackConfigFile := Some(baseDirectory.value/"webpack.config.js"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer.in(Test) := false,
-    webpackEmitSourceMaps := false,
-    enableReloadWorkflow := false
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv,
+    webpackBundlingMode := BundlingMode.LibraryOnly()
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
   .dependsOn(sharedJS)
