@@ -1,5 +1,7 @@
 package shared.requests.policies
 
+import shared.responses.policies.Statement
+
 case class CreatePolicyRequest (
   pathParams: CreatePolicyRequestPathParams,
   body: CreatePolicyRequestBody
@@ -11,5 +13,5 @@ case class CreatePolicyRequestPathParams(
 case class CreatePolicyRequestBody(
     name: String,
     path: String,
-    statements: List[String]
+    statements: List[Statement]
 )

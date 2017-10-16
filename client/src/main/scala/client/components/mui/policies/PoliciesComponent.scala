@@ -48,7 +48,8 @@ object PoliciesComponent {
           <.div(^.className := "card-padded",
             CreatePolicyDialog(
               s.createPolicyDialogOpened,
-              changeCreateGroupDialogStateCallback
+              changeCreateGroupDialogStateCallback,
+              (request) => p.proxy.dispatchCB(CreatePolicy(request))
             ),
             MuiCard()(
               MuiCardHeader(
@@ -65,7 +66,8 @@ object PoliciesComponent {
                 case Right(List()) => <.div(^.className := "card-padded",
                   CreatePolicyDialog(
                     s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback
+                    changeCreateGroupDialogStateCallback,
+                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
                   ),
                   MuiCard()(
                     MuiCardHeader(
@@ -77,7 +79,8 @@ object PoliciesComponent {
                 case Right(policyDetails) => <.div(^.className := "card-padded",
                   CreatePolicyDialog(
                     s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback
+                    changeCreateGroupDialogStateCallback,
+                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
                   ),
                   MuiCard()(
                     MuiCardHeader(
@@ -89,7 +92,8 @@ object PoliciesComponent {
                 case Left(foulkonError) => <.div(^.className := "card-padded",
                   CreatePolicyDialog(
                     s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback
+                    changeCreateGroupDialogStateCallback,
+                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
                   ),
                   MuiCard()(
                     MuiCardHeader(

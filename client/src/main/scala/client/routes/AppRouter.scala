@@ -6,7 +6,7 @@ import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
-import client.components.mui.policies.PoliciesComponent
+import client.components.mui.policies.{PoliciesComponent, PolicyFeedbackSnackbar}
 import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
 import client.components.mui.{CountAndFilterToolBar, NavToolBar}
 import japgolly.scalajs.react.extra.router._
@@ -41,6 +41,7 @@ object AppRouter {
       val groupMemberFeedbackWrapper = SPACircuit.connect(_.groupModule.groupMemberFeedbackReporting)
 
       val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
+      val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
       val usersRoute: Rule =
         staticRoute("#users", UsersLocation) ~>
@@ -69,8 +70,9 @@ object AppRouter {
           renderR(
             ctl =>
               <.div(
-                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
-                  MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl)))
+                  MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
+                  MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl))),
+                  MuiMuiThemeProvider()(policyFeedbackWrapper(PolicyFeedbackSnackbar(_)))
             )
           )
 
