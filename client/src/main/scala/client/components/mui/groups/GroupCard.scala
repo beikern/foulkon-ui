@@ -4,7 +4,17 @@ package components.mui.groups
 import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import chandu0101.scalajs.react.components.materialui.{
+  Mui,
+  MuiCard,
+  MuiCardActions,
+  MuiCardHeader,
+  MuiCardText,
+  MuiDivider,
+  MuiFlatButton,
+  MuiGridList,
+  MuiIconButton
+}
 import client.routes.AppRouter.{GroupMembersLocation, Location}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -27,11 +37,11 @@ object GroupCard {
   }
 
   case class Props(
-    groupDetail: GroupDetail,
-    router: RouterCtl[Location],
-    updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-    deleteGroup: (GroupOrg, GroupName) => Callback,
-    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+      groupDetail: GroupDetail,
+      router: RouterCtl[Location],
+      updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
+      deleteGroup: (GroupOrg, GroupName) => Callback,
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
   )
 
   case class State(
@@ -122,11 +132,11 @@ object GroupCard {
     .build
 
   def apply(
-    groupDetail: GroupDetail,
-    router: RouterCtl[Location],
-    updateGroup: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-    deleteGroup: (GroupOrg, GroupName) => Callback,
-    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+      groupDetail: GroupDetail,
+      router: RouterCtl[Location],
+      updateGroup: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
+      deleteGroup: (GroupOrg, GroupName) => Callback,
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
   ) =
     component(
       Props(

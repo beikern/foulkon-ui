@@ -2,8 +2,9 @@ package shared
 
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
 import shared.requests.groups._
-import shared.requests.policies.CreatePolicyRequest
+import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest}
 import shared.responses.groups.{AddMemberGroupResponse, GroupDeleteResponse, MemberInfo, RemoveMemberGroupResponse}
+import shared.responses.policies.DeletePolicyResponse
 import shared.responses.users.UserDeleteResponse
 
 import scala.concurrent.Future
@@ -23,4 +24,5 @@ trait Api {
   def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]]
   def readPolicies(): Future[Either[FoulkonError, List[PolicyDetail]]]
   def createPolicy(request: CreatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]
+  def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]]
 }

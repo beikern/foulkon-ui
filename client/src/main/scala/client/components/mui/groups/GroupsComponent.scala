@@ -57,7 +57,8 @@ object GroupsComponent {
               GroupList(
                 groupsFromProxy.groups,
                 p.router,
-                (groupOrg, actualGroupName, updatedGroupName, updatedGroupPath) => p.proxy.dispatchCB(UpdateGroup(groupOrg, actualGroupName, updatedGroupName, updatedGroupPath)),
+                (groupOrg, actualGroupName, updatedGroupName, updatedGroupPath) =>
+                  p.proxy.dispatchCB(UpdateGroup(groupOrg, actualGroupName, updatedGroupName, updatedGroupPath)),
                 (groupOrg, groupName) => p.proxy.dispatchCB(DeleteGroup(groupOrg, groupName)),
                 (id, groupOrg, groupName) => p.proxy.dispatchCB(RetrieveGroupMemberInfo(id, groupOrg, groupName))
             )

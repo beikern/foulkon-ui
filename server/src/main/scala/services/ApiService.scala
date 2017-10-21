@@ -9,10 +9,10 @@ import io.circe.parser._
 import shared.{Api, FoulkonError}
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
 import shared.requests.groups._
-import shared.requests.policies.{CreatePolicyRequest, GetPolicyRequest, GetPolicyRequestPathParams}
+import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, GetPolicyRequest, GetPolicyRequestPathParams}
 import shared.responses.FoulkonErrorFromJson
 import shared.responses.groups._
-import shared.responses.policies.CreatePolicyResponse
+import shared.responses.policies.{CreatePolicyResponse, DeletePolicyResponse}
 import shared.responses.users._
 import shared.utils.FoulkonErrorUtils
 
@@ -273,7 +273,7 @@ class ApiService(
     }
   }
   override def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberInfo]]] = {
-    memberGroupRequest(request).send().map{ response =>
+    memberGroupRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
@@ -288,7 +288,7 @@ class ApiService(
     }
   }
   def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]] = {
-    addMemberGroupRequest(request).send.map{ response =>
+    addMemberGroupRequest(request).send.map { response =>
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
@@ -298,7 +298,7 @@ class ApiService(
     }
   }
   def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]] = {
-    removeMemberGroupRequest(request).send.map{ response =>
+    removeMemberGroupRequest(request).send.map { response =>
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
@@ -404,6 +404,16 @@ class ApiService(
           )
         }
       }
+    }
+  }
+  def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]] = {
+    deletePolicyRequest(request).send.map { response =>
+      response.body
+        .leftMap { error =>
+          val decodeError = decode[FoulkonErrorFromJson](error)
+            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+          FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
+        }
     }
   }
 }

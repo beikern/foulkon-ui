@@ -44,64 +44,76 @@ object PoliciesComponent {
       <.div(
         p.proxy().renderFailed(ex => "Error loading"),
         p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy().renderEmpty(
-          <.div(^.className := "card-padded",
-            CreatePolicyDialog(
-              s.createPolicyDialogOpened,
-              changeCreateGroupDialogStateCallback,
-              (request) => p.proxy.dispatchCB(CreatePolicy(request))
-            ),
-            MuiCard()(
-              MuiCardHeader(
-                title = <.span(<.b(s"Policies")).render
-              )(),
-              MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
+        p.proxy()
+          .renderEmpty(
+            <.div(
+              ^.className := "card-padded",
+              CreatePolicyDialog(
+                s.createPolicyDialogOpened,
+                changeCreateGroupDialogStateCallback,
+                (request) => p.proxy.dispatchCB(CreatePolicy(request))
+              ),
+              MuiCard()(
+                MuiCardHeader(
+                  title = <.span(<.b(s"Policies")).render
+                )(),
+                MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
+              )
             )
-          )
-        ),
+          ),
         p.proxy()
           .render(
             policiesFromProxy => {
               policiesFromProxy.policies match {
-                case Right(List()) => <.div(^.className := "card-padded",
-                  CreatePolicyDialog(
-                    s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback,
-                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
-                  ),
-                  MuiCard()(
-                    MuiCardHeader(
-                      title = <.span(<.b(s"Policies")).render
-                    )(),
-                    MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
+                case Right(List()) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    CreatePolicyDialog(
+                      s.createPolicyDialogOpened,
+                      changeCreateGroupDialogStateCallback,
+                      (request) => p.proxy.dispatchCB(CreatePolicy(request))
+                    ),
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Policies")).render
+                      )(),
+                      MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
+                    )
                   )
-                )
-                case Right(policyDetails) => <.div(^.className := "card-padded",
-                  CreatePolicyDialog(
-                    s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback,
-                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
-                  ),
-                  MuiCard()(
-                    MuiCardHeader(
-                      title = <.span(<.b(s"Policies")).render
-                    )(),
-                    PolicyList(policyDetails)
+                case Right(policyDetails) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    CreatePolicyDialog(
+                      s.createPolicyDialogOpened,
+                      changeCreateGroupDialogStateCallback,
+                      (request) => p.proxy.dispatchCB(CreatePolicy(request))
+                    ),
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Policies")).render
+                      )(),
+                      PolicyList(
+                        policyDetails,
+                        (request) => p.proxy.dispatchCB(DeletePolicy(request))
+                      )
+                    )
                   )
-                )
-                case Left(foulkonError) => <.div(^.className := "card-padded",
-                  CreatePolicyDialog(
-                    s.createPolicyDialogOpened,
-                    changeCreateGroupDialogStateCallback,
-                    (request) => p.proxy.dispatchCB(CreatePolicy(request))
-                  ),
-                  MuiCard()(
-                    MuiCardHeader(
-                      title = <.span(<.b(s"Policies")).render
-                    )(),
-                    MuiCardText()(<.div(s"Can't show policies because the following foulkon error. Code: ${foulkonError.code}, message: ${foulkonError.message}. Sorry!"))
+                case Left(foulkonError) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    CreatePolicyDialog(
+                      s.createPolicyDialogOpened,
+                      changeCreateGroupDialogStateCallback,
+                      (request) => p.proxy.dispatchCB(CreatePolicy(request))
+                    ),
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Policies")).render
+                      )(),
+                      MuiCardText()(<.div(
+                        s"Can't show policies because the following foulkon error. Code: ${foulkonError.code}, message: ${foulkonError.message}. Sorry!"))
+                    )
                   )
-                )
               }
             }
           ),

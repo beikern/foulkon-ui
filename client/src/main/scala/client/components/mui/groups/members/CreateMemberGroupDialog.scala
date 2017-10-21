@@ -36,7 +36,7 @@ object CreateMemberGroupDialog {
                 userIdErrorText = js.defined("Input must be non empty."),
                 userIdValue = None,
                 inputValidated = false
-              ))
+            ))
         case value if value.length > nameMaxLength =>
           $.modState(
             s =>
@@ -44,7 +44,7 @@ object CreateMemberGroupDialog {
                 userIdErrorText = js.defined(s"Input must have less than $nameMaxLength characters."),
                 userIdValue = None,
                 inputValidated = false
-              ))
+            ))
         case value if !namePattern.matcher(value).matches =>
           $.modState(
             s =>
@@ -52,14 +52,14 @@ object CreateMemberGroupDialog {
                 userIdValue = None,
                 userIdErrorText = js.defined(s"Input does not match the pattern $namePattern. Name example: user"),
                 inputValidated = false
-              ))
+            ))
         case _ =>
           $.modState(
             s =>
               s.copy(
                 userIdValue = Some(actualValue),
                 inputValidated = true
-              )
+            )
           )
       }
     }
@@ -69,7 +69,6 @@ object CreateMemberGroupDialog {
         p.changeDialogState(false) >> $.setState(State())
       }
       def handleDialogSubmit: TouchTapEvent => Callback = { TouchTapEvent =>
-
         s.userIdValue match {
           case Some(userIdValue) =>
             p.changeDialogState(false) >> p.createGroupMemberCallback(p.idGroup, p.organizationId, p.name, userIdValue) >> $.setState(State())
@@ -107,17 +106,12 @@ object CreateMemberGroupDialog {
     .build
 
   def apply(
-             idGroup: String,
-             organizationId: String,
-             name: String,
-             dialogOpened: Boolean,
-             changeDialogState: Boolean => Callback,
-             createGroupMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
-  ) = component(Props(idGroup: String,
-    organizationId,
-    name,
-    dialogOpened,
-    changeDialogState,
-    createGroupMemberCallback))
+      idGroup: String,
+      organizationId: String,
+      name: String,
+      dialogOpened: Boolean,
+      changeDialogState: Boolean => Callback,
+      createGroupMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+  ) = component(Props(idGroup: String, organizationId, name, dialogOpened, changeDialogState, createGroupMemberCallback))
 
 }

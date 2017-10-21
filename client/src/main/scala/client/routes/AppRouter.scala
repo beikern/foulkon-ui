@@ -14,16 +14,16 @@ import japgolly.scalajs.react.vdom.html_<^._
 
 object AppRouter {
 
-  case class GroupUUID (id: UUID)
+  case class GroupUUID(id: UUID)
 
   sealed trait Location
 
-  case object UsersLocation          extends Location
-  case object GroupsLocation         extends Location
-  case object PoliciesLocation       extends Location
-  case object ProxyResourcesLocation extends Location
-  case object OidcProviderLocation   extends Location
-  case object AuthoritationLocation  extends Location
+  case object UsersLocation                 extends Location
+  case object GroupsLocation                extends Location
+  case object PoliciesLocation              extends Location
+  case object ProxyResourcesLocation        extends Location
+  case object OidcProviderLocation          extends Location
+  case object AuthoritationLocation         extends Location
   case class GroupMembersLocation(id: UUID) extends Location
 
   // Configure the router
@@ -37,10 +37,10 @@ object AppRouter {
       val groupWrapper         = SPACircuit.connect(_.groupModule)
       val groupFeedbackWrapper = SPACircuit.connect(_.groupModule.groupFeedbackReporting)
 
-      val groupMemberWrapper = SPACircuit.connect(_.groupModule.members)
+      val groupMemberWrapper         = SPACircuit.connect(_.groupModule.members)
       val groupMemberFeedbackWrapper = SPACircuit.connect(_.groupModule.groupMemberFeedbackReporting)
 
-      val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
+      val policiesWrapper       = SPACircuit.connect(_.policyModule.policies)
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
       val usersRoute: Rule =
@@ -70,9 +70,9 @@ object AppRouter {
           renderR(
             ctl =>
               <.div(
-                  MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
-                  MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl))),
-                  MuiMuiThemeProvider()(policyFeedbackWrapper(PolicyFeedbackSnackbar(_)))
+                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
+                MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl))),
+                MuiMuiThemeProvider()(policyFeedbackWrapper(PolicyFeedbackSnackbar(_)))
             )
           )
 
@@ -83,16 +83,14 @@ object AppRouter {
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Members", 1))),
               MuiMuiThemeProvider()(groupMemberWrapper(groupMetadataWithMember => MembersComponent(p.id.toString, groupMetadataWithMember, ctl))),
               MuiMuiThemeProvider()(groupMemberFeedbackWrapper(GroupMemberFeedbackSnackbar(_)))
-            )
-
+          )
         )
 
       (emptyRule
-          |usersRoute
-          | groupsRoute
-          | groupMembersRoute
-          | policiesRoute
-      ).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
+        | usersRoute
+        | groupsRoute
+        | groupMembersRoute
+        | policiesRoute).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
     }
     .renderWith(layout)
 

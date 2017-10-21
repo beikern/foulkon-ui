@@ -8,11 +8,11 @@ import shared.responses.groups.MemberInfo
 object MemberList {
 
   case class Props(
-    id: String,
-    organizationId: String,
-    groupName: String,
-    members: List[MemberInfo],
-    removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      id: String,
+      organizationId: String,
+      groupName: String,
+      members: List[MemberInfo],
+      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   )
 
   private val component = ScalaComponent
@@ -20,20 +20,16 @@ object MemberList {
     .render_P(
       p => {
         <.div(
-            p.members
-              .map{
-                member =>
-                  <.div(^.className := "card-nested-padded",
-                        MemberCard(
-                          p.id,
-                          p.organizationId,
-                          p.groupName,
-                          member,
-                          p.removeMemberCallback
-                        )
-                  )
-              }
-              .toTagMod
+          p.members.map { member =>
+            <.div(^.className := "card-nested-padded",
+                  MemberCard(
+                    p.id,
+                    p.organizationId,
+                    p.groupName,
+                    member,
+                    p.removeMemberCallback
+                  ))
+          }.toTagMod
         )
       }
     )
@@ -45,7 +41,7 @@ object MemberList {
       groupName: String,
       members: List[MemberInfo],
       removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
-           ) = component(
+  ) = component(
     Props(
       id,
       organizationId,

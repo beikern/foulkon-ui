@@ -20,18 +20,18 @@ object CreatePolicyDialog {
       createPolicyCallback: (CreatePolicyRequest) => Callback
   )
   case class State(
-    inputValidated: Boolean = false,
-    orgValidation: Boolean = false,
-    orgErrorText: js.UndefOr[VdomNode] = js.undefined,
-    orgValue: Option[String] = None,
-    nameValidation: Boolean = false,
-    nameErrorText: js.UndefOr[VdomNode] = js.undefined,
-    nameValue: Option[String] = None,
-    pathValidation: Boolean = false,
-    pathErrorText: js.UndefOr[VdomNode] = js.undefined,
-    pathValue: Option[String] = None,
-    statements: mutable.Map[Int, Option[Statement]] =  mutable.LinkedHashMap(0 -> None),
-    statementKey: Int = 0
+      inputValidated: Boolean = false,
+      orgValidation: Boolean = false,
+      orgErrorText: js.UndefOr[VdomNode] = js.undefined,
+      orgValue: Option[String] = None,
+      nameValidation: Boolean = false,
+      nameErrorText: js.UndefOr[VdomNode] = js.undefined,
+      nameValue: Option[String] = None,
+      pathValidation: Boolean = false,
+      pathErrorText: js.UndefOr[VdomNode] = js.undefined,
+      pathValue: Option[String] = None,
+      statements: mutable.Map[Int, Option[Statement]] = mutable.LinkedHashMap(0 -> None),
+      statementKey: Int = 0
   )
 
   class Backend($ : BackendScope[Props, State]) {
@@ -39,9 +39,9 @@ object CreatePolicyDialog {
     val updateInputValidatedCallback = {
       $.modState(
         s => {
-          val statementsValidated = s.statements.forall{
+          val statementsValidated = s.statements.forall {
             case (_, Some(_)) => true
-            case _ => false
+            case _            => false
           }
           if (s.orgValidation && s.nameValidation && s.pathValidation && statementsValidated) {
             s.copy(inputValidated = true)
@@ -54,20 +54,23 @@ object CreatePolicyDialog {
 
     val addStatement = (event: ReactEvent) =>
       $.modState(
-        s => s.copy(
-          statementKey = s.statementKey + 1,
-          statements = s.statements.updated(s.statementKey + 1, None)
+        s =>
+          s.copy(
+            statementKey = s.statementKey + 1,
+            statements = s.statements.updated(s.statementKey + 1, None)
         )
       ) >> updateInputValidatedCallback
 
-    val removeStatement= (keyToRemove: Int) => (event: ReactEvent) =>
-      $.modState(
-        s => s.copy(
-          statements = s.statements - keyToRemove
-        )
-      ) >> updateInputValidatedCallback
+    val removeStatement = (keyToRemove: Int) =>
+      (event: ReactEvent) =>
+        $.modState(
+          s =>
+            s.copy(
+              statements = s.statements - keyToRemove
+          )
+        ) >> updateInputValidatedCallback
 
-    def handleStatementResult (key: Int, statement: Option[Statement]): Callback = {
+    def handleStatementResult(key: Int, statement: Option[Statement]): Callback = {
       $.modState(
         s => {
           val updatedStatements = s.statements.updated(key, statement)
@@ -75,7 +78,7 @@ object CreatePolicyDialog {
             statements = updatedStatements
           )
         }
-      )>> Callback.log("executed handleStatementResult")  >> updateInputValidatedCallback
+      ) >> Callback.log("executed handleStatementResult") >> updateInputValidatedCallback
     }
 
     val orgValidationCallback: (ReactEventFromInput, String) => Callback = { (event: ReactEventFromInput, actualValue: String) =>
@@ -163,11 +166,8 @@ object CreatePolicyDialog {
                 pathValue = None
             )) >> updateInputValidatedCallback
         case value if value.length > pathMaxLength =>
-          $.modState(
-            s =>
-              s.copy(pathValidation = false,
-                     pathErrorText = js.defined(s"Input must have less than $pathMaxLength characters."),
-                     pathValue = None))
+          $.modState(s =>
+            s.copy(pathValidation = false, pathErrorText = js.defined(s"Input must have less than $pathMaxLength characters."), pathValue = None))
         case value if !pathPattern.matcher(value).matches =>
           $.modState(
             s =>
@@ -278,9 +278,9 @@ object CreatePolicyDialog {
     .build
 
   def apply(
-             dialogOpened: Boolean,
-             changeDialogState: Boolean => Callback,
-             createPolicyCallback: (CreatePolicyRequest) => Callback
+      dialogOpened: Boolean,
+      changeDialogState: Boolean => Callback,
+      createPolicyCallback: (CreatePolicyRequest) => Callback
   ) = component(Props(dialogOpened, changeDialogState, createPolicyCallback))
 
 }

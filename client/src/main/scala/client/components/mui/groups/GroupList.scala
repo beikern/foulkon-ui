@@ -11,11 +11,11 @@ import shared.entities.GroupDetail
 object GroupList {
 
   case class Props(
-    groupsEither: Either[FoulkonError, List[GroupDetail]],
-    router: RouterCtl[Location],
-    updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-    deleteGroupCallback: (GroupOrg, GroupName) => Callback,
-    retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+      groupsEither: Either[FoulkonError, List[GroupDetail]],
+      router: RouterCtl[Location],
+      updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
+      deleteGroupCallback: (GroupOrg, GroupName) => Callback,
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
   )
 
   private val GroupList = ScalaComponent
@@ -47,6 +47,6 @@ object GroupList {
             router: RouterCtl[Location],
             updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
             deleteGroupCallback: (GroupOrg, GroupName) => Callback,
-            retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
-           ) = GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback))
+            retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback) =
+    GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback))
 }

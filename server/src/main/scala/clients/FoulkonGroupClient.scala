@@ -57,7 +57,8 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
   val memberGroupRequest =
     (request: MemberGroupRequest) =>
       sttp
-        .get(uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users?Limit=1000")
+        .get(
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users?Limit=1000")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)
@@ -66,7 +67,8 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
   val addMemberGroupRequest =
     (request: AddMemberGroupRequest) =>
       sttp
-        .post(uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users/${request.pathParams.userId}")
+        .post(
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users/${request.pathParams.userId}")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)
@@ -75,7 +77,8 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
   val removeMemberGroupRequest =
     (request: RemoveMemberGroupRequest) =>
       sttp
-        .delete(uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users/${request.pathParams.userId}")
+        .delete(
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users/${request.pathParams.userId}")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)

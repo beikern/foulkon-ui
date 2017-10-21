@@ -127,11 +127,7 @@ object UpdateGroupDialog {
         updateGroupData match {
           case Some(groupDataToUpdate) =>
             p.changeDialogState(false) >>
-              p.updateGroupCallback(
-                p.actualGroup.org,
-                p.actualGroup.name,
-                groupDataToUpdate.name,
-                groupDataToUpdate.path) >>
+              p.updateGroupCallback(p.actualGroup.org, p.actualGroup.name, groupDataToUpdate.name, groupDataToUpdate.path) >>
               $.setState(State())
           case None =>
             Callback.log(s"Something failed, the group was no updated, wooops!") >> p.changeDialogState(false) >> $.setState(State())
@@ -174,10 +170,10 @@ object UpdateGroupDialog {
     .build
 
   def apply(
-     actualGroup: GroupDetail,
-     dialogOpened: Boolean,
-     updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
-     changeDialogState: Boolean => Callback
+      actualGroup: GroupDetail,
+      dialogOpened: Boolean,
+      updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
+      changeDialogState: Boolean => Callback
   ) = component(
     Props(
       actualGroup,

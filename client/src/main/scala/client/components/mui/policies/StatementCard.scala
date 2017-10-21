@@ -1,7 +1,17 @@
 package client.components.mui.policies
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFlatButton, MuiGridList, MuiIconButton, MuiTextField, ZDepth}
+import chandu0101.scalajs.react.components.materialui.{
+  Mui,
+  MuiCard,
+  MuiCardHeader,
+  MuiCardText,
+  MuiFlatButton,
+  MuiGridList,
+  MuiIconButton,
+  MuiTextField,
+  ZDepth
+}
 import client.components.utils.FoulkonMaxLengths._
 import client.components.utils.FoulkonRegexPatterns._
 import japgolly.scalajs.react._
@@ -25,19 +35,19 @@ object StatementCard {
   }
 
   case class Props(
-    key: Int,
-    removeStatementCallback: Int => ReactEvent => Callback,
-    reportStatementChangesCallback: (Int, Option[Statement]) => Callback
+      key: Int,
+      removeStatementCallback: Int => ReactEvent => Callback,
+      reportStatementChangesCallback: (Int, Option[Statement]) => Callback
   )
 
   case class State(
-    effectValidated: Boolean = false,
-    effectValue: Option[String] = None,
-    effectErrorText: js.UndefOr[VdomNode] = js.undefined,
-    actionKey: Int = 0,
-    actions: mutable.Map[Int, ActionState] = mutable.LinkedHashMap(0 -> ActionState()),
-    resources: mutable.Map[Int, ResourceState] = mutable.LinkedHashMap(0 -> ResourceState()),
-    resourceKey: Int = 0
+      effectValidated: Boolean = false,
+      effectValue: Option[String] = None,
+      effectErrorText: js.UndefOr[VdomNode] = js.undefined,
+      actionKey: Int = 0,
+      actions: mutable.Map[Int, ActionState] = mutable.LinkedHashMap(0     -> ActionState()),
+      resources: mutable.Map[Int, ResourceState] = mutable.LinkedHashMap(0 -> ResourceState()),
+      resourceKey: Int = 0
   )
 
   class Backend($ : BackendScope[Props, State]) {
@@ -51,15 +61,15 @@ object StatementCard {
                 effectValidated = false,
                 effectErrorText = js.defined("Input must be non empty."),
                 effectValue = None
-              ))
-        case value if value != "allow" && value != "deny"=>
+            ))
+        case value if value != "allow" && value != "deny" =>
           $.modState(
             s =>
               s.copy(
                 effectValidated = false,
                 effectErrorText = js.defined("""effect must be "allow" or "deny"."""),
                 effectValue = None
-              ))
+            ))
         case _ =>
           $.modState(
             s =>
@@ -67,22 +77,24 @@ object StatementCard {
                 effectValidated = true,
                 effectErrorText = js.undefined,
                 effectValue = Some(actualValue)
-              ))
+            ))
       }
     }
 
     val addAction = (event: ReactEvent) =>
       $.modState(
-        s => s.copy(
-          actionKey = s.actionKey + 1,
-          actions = s.actions.updated(s.actionKey + 1, ActionState())
+        s =>
+          s.copy(
+            actionKey = s.actionKey + 1,
+            actions = s.actions.updated(s.actionKey + 1, ActionState())
         )
-      )
+    )
 
     def removeAction(keyToRemove: Int)(event: ReactEvent) =
       $.modState(
-        s => s.copy(
-          actions = s.actions - keyToRemove
+        s =>
+          s.copy(
+            actions = s.actions - keyToRemove
         )
       )
 
@@ -95,7 +107,6 @@ object StatementCard {
                 value = None,
                 validated = false,
                 errorText = js.defined("Input must be non empty.")
-
               )
               s.copy(
                 actions = s.actions.updated(keyToUpdate, emptyAction)
@@ -146,16 +157,18 @@ object StatementCard {
 
     val addResource = (event: ReactEvent) =>
       $.modState(
-        s => s.copy(
-          resourceKey = s.resourceKey + 1,
-          resources = s.resources.updated(s.resourceKey + 1, ResourceState())
+        s =>
+          s.copy(
+            resourceKey = s.resourceKey + 1,
+            resources = s.resources.updated(s.resourceKey + 1, ResourceState())
         )
-      )
+    )
 
     def removeResource(keyToRemove: Int)(event: ReactEvent) =
       $.modState(
-        s => s.copy(
-          resources = s.resources - keyToRemove
+        s =>
+          s.copy(
+            resources = s.resources - keyToRemove
         )
       )
 
@@ -168,7 +181,6 @@ object StatementCard {
                 value = None,
                 validated = false,
                 errorText = js.defined("Input must be non empty.")
-
               )
               s.copy(
                 resources = s.resources.updated(keyToUpdate, emptyResource)
@@ -295,7 +307,8 @@ object StatementCard {
         )
       }
 
-      <.div(^.className := "card-padded",
+      <.div(
+        ^.className := "card-padded",
         MuiCard(zDepth = js.defined(ZDepth._3))(
           if (p.key != 0) {
             MuiGridList(cellHeight = js.defined(50))(
@@ -311,8 +324,7 @@ object StatementCard {
                 )
               )
             )
-          }
-          else {
+          } else {
             MuiCardHeader(
               title = <.span(<.b(s"Statement")).render
             )()
@@ -325,12 +337,8 @@ object StatementCard {
                 errorText = s.effectErrorText
               )()
             ),
-            <.div(^.className := "card-nested-padded",
-              cardActionsToRender
-            ),
-            <.div(^.className := "card-nested-padded",
-              cardResourcesToRender
-            )
+            <.div(^.className := "card-nested-padded", cardActionsToRender),
+            <.div(^.className := "card-nested-padded", cardResourcesToRender)
           )
         )
       )
@@ -342,21 +350,19 @@ object StatementCard {
     .initialState(State())
     .renderBackend[Backend]
     .shouldComponentUpdate( // This has to be done to avoid infinite loops, see react lifecycle for more information
-      f =>
-        CallbackTo(f.nextState != f.currentState)
-    )
+      f => CallbackTo(f.nextState != f.currentState))
     .componentDidUpdate(
       f => {
         val key = f.currentProps.key
-        val allActionsValidated = f.currentState.actions.forall{
+        val allActionsValidated = f.currentState.actions.forall {
           case (_, actionState) => actionState.validated
         }
 
-        val allResourcesValidated = f.currentState.resources.forall{
+        val allResourcesValidated = f.currentState.resources.forall {
           case (_, resourceState) => resourceState.validated
         }
 
-        val effectValidated =  f.currentState.effectValidated
+        val effectValidated = f.currentState.effectValidated
 
         if (allActionsValidated && allResourcesValidated && effectValidated) {
           val actions = f.currentState.actions.toList.map {
@@ -378,20 +384,20 @@ object StatementCard {
     .build
 
   case class ActionState(
-    value: Option[String] = None,
-    validated: Boolean = false,
-    errorText: js.UndefOr[VdomNode] = js.undefined
+      value: Option[String] = None,
+      validated: Boolean = false,
+      errorText: js.UndefOr[VdomNode] = js.undefined
   )
   case class ResourceState(
-    value: Option[String] = None,
-    validated: Boolean = false,
-    errorText: js.UndefOr[VdomNode] = js.undefined
+      value: Option[String] = None,
+      validated: Boolean = false,
+      errorText: js.UndefOr[VdomNode] = js.undefined
   )
 
   def apply(
-    key: Int,
-    removeStatementCallback: Int => ReactEvent => Callback,
-    reportStatementChangesCallback: (Int, Option[Statement]) => Callback
+      key: Int,
+      removeStatementCallback: Int => ReactEvent => Callback,
+      reportStatementChangesCallback: (Int, Option[Statement]) => Callback
   ) =
     component(
       Props(

@@ -15,6 +15,7 @@ import chandu0101.scalajs.react.components.materialui.{
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.PolicyDetail
+import shared.requests.policies.DeletePolicyRequest
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -32,7 +33,8 @@ object PolicyCard {
   }
 
   case class Props(
-      policyDetail: PolicyDetail
+      policyDetail: PolicyDetail,
+      deletePolicyCallback: (DeletePolicyRequest) => Callback
   )
 
   case class State(
@@ -42,17 +44,17 @@ object PolicyCard {
   )
 
   class Backend($ : BackendScope[Props, State]) {
-//    val changeDeleteGroupDialogStateCallback = (dialogState: Boolean) => {
-//      $.modState(s => s.copy(deleteDialogOpened = dialogState))
-//    }
-//    val changeUpdateGroupDialogStateCallback = (dialogState: Boolean) => {
-//      $.modState(s => s.copy(updateDialogOpened = dialogState))
-//    }
-//
-//    def showAreYouSureDeleteDialog(event: ReactEvent): Callback = {
-//      $.modState(s => s.copy(deleteDialogOpened = true))
-//    }
-//
+    val changeDeletePolicyStateCallback = (dialogState: Boolean) => {
+      $.modState(s => s.copy(deleteDialogOpened = dialogState))
+    }
+    val changeUpdatePolicyStateCallback = (dialogState: Boolean) => {
+      $.modState(s => s.copy(updateDialogOpened = dialogState))
+    }
+
+    def showAreYouSureDeleteDialog(event: ReactEvent): Callback = {
+      $.modState(s => s.copy(deleteDialogOpened = true))
+    }
+
 //    def showUpdateGroupDialog(event: ReactEvent): Callback = {
 //      $.modState(s => s.copy(updateDialogOpened = true))
 //    }
@@ -74,25 +76,32 @@ object PolicyCard {
       }
 
       <.div(
+        AreYouSureRemovePolicyDialog(
+          p.policyDetail,
+          s.deleteDialogOpened,
+          p.deletePolicyCallback,
+          changeDeletePolicyStateCallback
+        ),
         MuiCard(expanded = js.defined(s.statementExpanded))(
-          <.div(MuiGridList(cellHeight = js.defined(50))(
-            MuiCardHeader(
-              title = <.span(<.b(s"${p.policyDetail.id}")).render
-            )(),
-            <.div(
-              Style.editDeleteButton,
-              MuiIconButton(
+          <.div(
+            MuiGridList(cellHeight = js.defined(50))(
+              MuiCardHeader(
+                title = <.span(<.b(s"${p.policyDetail.id}")).render
+              )(),
+              <.div(
+                Style.editDeleteButton,
+                MuiIconButton(
 //                  onClick = js.defined(showUpdateGroupDialog _)
-              )(
-                Mui.SvgIcons.EditorModeEdit.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
-              ),
-              MuiIconButton(
-//                  onClick = js.defined(showAreYouSureDeleteDialog _)
-              )(
-                Mui.SvgIcons.ActionDelete.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+                )(
+                  Mui.SvgIcons.EditorModeEdit.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+                ),
+                MuiIconButton(
+                  onClick = js.defined(showAreYouSureDeleteDialog _)
+                )(
+                  Mui.SvgIcons.ActionDelete.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
+                )
               )
-            )
-          )),
+            )),
           MuiCardText()(
             <.div(
               <.p(<.b("name: "), s"${p.policyDetail.name}"),
@@ -128,11 +137,13 @@ object PolicyCard {
     .build
 
   def apply(
-      policyDetail: PolicyDetail
+      policyDetail: PolicyDetail,
+      deletePolicyCallback: (DeletePolicyRequest) => Callback
   ) =
     component(
       Props(
-        policyDetail
+        policyDetail,
+        deletePolicyCallback
       )
     )
 }

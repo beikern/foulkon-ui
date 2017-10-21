@@ -1,21 +1,19 @@
-package client
-package components.mui.groups.members
+package client.components.mui.policies
 
 import chandu0101.scalajs.react.components.materialui.{MuiDialog, MuiFlatButton, TouchTapEvent}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import shared.entities.PolicyDetail
+import shared.requests.policies.{DeletePolicyPathParams, DeletePolicyRequest}
 
 import scala.scalajs.js
 
-object AreYouSureRemoveGroupMemberDialog {
+object AreYouSureRemovePolicyDialog {
 
   case class Props(
-      id: String,
-      groupOrg: String,
-      groupName: String,
-      userId: String,
+      policyDetail: PolicyDetail,
       dialogOpened: Boolean,
-      callbackToDelete: (String, GroupOrg, GroupName, UserId) => Callback,
+      callbackToDelete: (DeletePolicyRequest) => Callback,
       changeDialogState: Boolean => Callback
   )
 
@@ -27,18 +25,19 @@ object AreYouSureRemoveGroupMemberDialog {
         Callback.info("Cancel clicked") >> p.changeDialogState(false)
       }
       def handleDialogSubmit: TouchTapEvent => Callback = { TouchTapEvent =>
-        Callback.info("Submit clicked") >> p.callbackToDelete(p.id, p.groupOrg, p.groupName, p.userId) >> p.changeDialogState(false)
+        val request = DeletePolicyRequest(DeletePolicyPathParams(p.policyDetail.org, p.policyDetail.name))
+        Callback.info("Submit clicked") >> p.callbackToDelete(request) >> p.changeDialogState(false)
       }
 
       val actions: VdomNode = js
         .Array(
           MuiFlatButton(key = "1", label = "Cancel", onTouchTap = handleDialogCancel)(),
-          MuiFlatButton(key = "2", label = "Remove", secondary = true, onTouchTap = handleDialogSubmit)()
+          MuiFlatButton(key = "2", label = "Delete", secondary = true, onTouchTap = handleDialogSubmit)()
         )
         .toVdomArray
 
       MuiDialog(
-        title = js.defined(s"Removing ${p.userId} from org ${p.groupOrg} with name ${p.groupName}, Are you sure?"),
+        title = js.defined(s"Removing ${p.policyDetail.name}, org ${p.policyDetail.org} , Are you sure?"),
         actions = actions,
         open = p.dialogOpened
       )()
@@ -46,18 +45,15 @@ object AreYouSureRemoveGroupMemberDialog {
   }
 
   val component = ScalaComponent
-    .builder[Props]("AreYouSureRemoveMemberDialog")
+    .builder[Props]("AreYouSureDeletePolicyDialog")
     .renderBackend[Backend]
     .build
 
   def apply(
-      id: String,
-      groupOrg: String,
-      groupName: String,
-      userId: String,
+      policyDetail: PolicyDetail,
       dialogOpened: Boolean,
-      callbackToDelete: (String, GroupOrg, GroupName, UserId) => Callback,
+      callbackToDelete: (DeletePolicyRequest) => Callback,
       changeDialogState: Boolean => Callback
-  ) = component(Props(id, groupOrg, groupName, userId, dialogOpened, callbackToDelete, changeDialogState))
+  ) = component(Props(policyDetail, dialogOpened, callbackToDelete, changeDialogState))
 
 }

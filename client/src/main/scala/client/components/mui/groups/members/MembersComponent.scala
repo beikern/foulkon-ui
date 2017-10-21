@@ -54,7 +54,8 @@ object MembersComponent {
                 changeCreateGroupMemberAssocDialogStateCallback,
                 (id, org, name, userid) => p.proxy.dispatchCB(AddGroupMember(id, org, name, userid))
               ),
-              <.div(^.className := "card-padded",
+              <.div(
+                ^.className := "card-padded",
                 MuiCard()(
                   MuiCardHeader(
                     title = <.span(<.b(s"Group ${p.id} members")).render
@@ -65,7 +66,8 @@ object MembersComponent {
             )
           case Some(GroupMetadataWithMember(_, _, Left(foulkonError))) =>
             println(s"SOME CASE, foulkon error")
-            <.div(^.className := "card-padded",
+            <.div(
+              ^.className := "card-padded",
               MuiCard()(
                 MuiCardHeader(
                   title = <.span(<.b(s"Group ${p.id} members")).render
@@ -84,18 +86,24 @@ object MembersComponent {
                 changeCreateGroupMemberAssocDialogStateCallback,
                 (id, org, name, userid) => p.proxy.dispatchCB(AddGroupMember(id, org, name, userid))
               ),
-              <.div(^.className := "card-padded",
+              <.div(
+                ^.className := "card-padded",
                 MuiCard()(
                   MuiCardHeader(
                     title = <.span(<.b(s"Group ${p.id} members")).render
                   )(),
-                  MemberList(p.id, organizationId, name, memberInfoList,(id, org, name, userid) =>  p.proxy.dispatchCB(RemoveGroupMember(id, org, name, userid)))
+                  MemberList(p.id,
+                             organizationId,
+                             name,
+                             memberInfoList,
+                             (id, org, name, userid) => p.proxy.dispatchCB(RemoveGroupMember(id, org, name, userid)))
                 )
               )
             )
           case None =>
             println("NONE CASE")
-            <.div(^.className := "card-padded",
+            <.div(
+              ^.className := "card-padded",
               MuiCard()(
                 MuiCardHeader(
                   title = <.span(<.b(s"Group ${p.id} members")).render
@@ -122,9 +130,9 @@ object MembersComponent {
     .build
 
   def apply(
-    id: String,
-    proxy: ModelProxy[Map[String, GroupMetadataWithMember]],
-    router: RouterCtl[Location]
+      id: String,
+      proxy: ModelProxy[Map[String, GroupMetadataWithMember]],
+      router: RouterCtl[Location]
   ) = component(Props(id, proxy, router))
 
 }
