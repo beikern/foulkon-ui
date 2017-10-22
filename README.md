@@ -1,6 +1,10 @@
-# scala-js-spa #
+# Foulkon UI #
 
-Welcome to scala-js-spa!
+Welcome to Foulkon UI!
+
+This is an UI for the authorization server written in Go [Foulkon](https://github.com/Tecsisa/foulkon)
+
+It's in a WIP state, stay tuned!
 
 ## Contribution policy ##
 
