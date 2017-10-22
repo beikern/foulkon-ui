@@ -60,7 +60,8 @@ object GroupsComponent {
                 (groupOrg, actualGroupName, updatedGroupName, updatedGroupPath) =>
                   p.proxy.dispatchCB(UpdateGroup(groupOrg, actualGroupName, updatedGroupName, updatedGroupPath)),
                 (groupOrg, groupName) => p.proxy.dispatchCB(DeleteGroup(groupOrg, groupName)),
-                (id, groupOrg, groupName) => p.proxy.dispatchCB(RetrieveGroupMemberInfo(id, groupOrg, groupName))
+                (id, groupOrg, groupName) => p.proxy.dispatchCB(RetrieveGroupMemberInfo(id, groupOrg, groupName)),
+                (id, request) => p.proxy.dispatchCB(RetrieveGroupPolicyInfo(id, request))
             )
           ),
         <.div(

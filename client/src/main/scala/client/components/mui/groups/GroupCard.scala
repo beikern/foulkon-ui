@@ -4,22 +4,13 @@ package components.mui.groups
 import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{
-  Mui,
-  MuiCard,
-  MuiCardActions,
-  MuiCardHeader,
-  MuiCardText,
-  MuiDivider,
-  MuiFlatButton,
-  MuiGridList,
-  MuiIconButton
-}
-import client.routes.AppRouter.{GroupMembersLocation, Location}
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import client.routes.AppRouter.{GroupMembersLocation, GroupPoliciesLocation, Location}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.GroupDetail
+import shared.requests.groups.policies.{PoliciesAssociatedToGroupRequest, PoliciesAssociatedToGroupRequestPathParams}
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -41,7 +32,8 @@ object GroupCard {
       router: RouterCtl[Location],
       updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
       deleteGroup: (GroupOrg, GroupName) => Callback,
-      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
+      retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback
   )
 
   case class State(
@@ -118,6 +110,12 @@ object GroupCard {
               label = js.defined("members"),
               href = js.defined(p.router.urlFor(GroupMembersLocation(UUID.fromString(p.groupDetail.id))).value),
               onClick = js.defined((_) => p.retrieveGroupMemberInfoCallback(p.groupDetail.id, p.groupDetail.org, p.groupDetail.name))
+            )(),
+            MuiFlatButton(
+              primary = js.defined(true),
+              label = js.defined("policies"),
+              href = js.defined(p.router.urlFor(GroupPoliciesLocation(UUID.fromString(p.groupDetail.id))).value),
+              onClick = js.defined((_) => p.retrieveGroupPoliciesInfoCallback(p.groupDetail.id, PoliciesAssociatedToGroupRequest(PoliciesAssociatedToGroupRequestPathParams(p.groupDetail.org, p.groupDetail.name))))
             )()
           )
         )
@@ -136,15 +134,17 @@ object GroupCard {
       router: RouterCtl[Location],
       updateGroup: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
       deleteGroup: (GroupOrg, GroupName) => Callback,
-      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
-  ) =
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
+      retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback
+           ) =
     component(
       Props(
         groupDetail,
         router,
         updateGroup,
         deleteGroup,
-        retrieveGroupMemberInfoCallback
+        retrieveGroupMemberInfoCallback,
+        retrieveGroupPoliciesInfoCallback
       )
     )
 }

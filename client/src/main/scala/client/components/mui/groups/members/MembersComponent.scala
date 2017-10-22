@@ -123,7 +123,7 @@ object MembersComponent {
   }
 
   val component = ScalaComponent
-    .builder[Props]("Groups")
+    .builder[Props]("GroupMembersComponent")
     .initialState(State())
     .renderBackend[Backend]
     .componentDidMount(scope => scope.backend.mounted(scope.props))

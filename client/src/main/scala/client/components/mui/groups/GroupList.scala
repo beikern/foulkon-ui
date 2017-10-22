@@ -7,6 +7,7 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.FoulkonError
 import shared.entities.GroupDetail
+import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
 
 object GroupList {
 
@@ -15,7 +16,8 @@ object GroupList {
       router: RouterCtl[Location],
       updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
       deleteGroupCallback: (GroupOrg, GroupName) => Callback,
-      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback
+      retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
+      retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback
   )
 
   private val GroupList = ScalaComponent
@@ -33,7 +35,8 @@ object GroupList {
                           p.router,
                           p.updateGroupCallback,
                           p.deleteGroupCallback,
-                          p.retrieveGroupMemberInfoCallback
+                          p.retrieveGroupMemberInfoCallback,
+                          p.retrieveGroupPoliciesInfoCallback
                         ))
               )
               .toTagMod
@@ -47,6 +50,7 @@ object GroupList {
             router: RouterCtl[Location],
             updateGroupCallback: (GroupOrg, GroupName, GroupName, GroupPath) => Callback,
             deleteGroupCallback: (GroupOrg, GroupName) => Callback,
-            retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback) =
-    GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback))
+            retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
+            retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback) =
+    GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback, retrieveGroupPoliciesInfoCallback))
 }

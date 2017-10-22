@@ -320,6 +320,7 @@ class ApiService(
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
+            println("WHAAAT "+responseEither)
             responseEither.right.get.policies
           }
         )

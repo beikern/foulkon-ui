@@ -3,8 +3,8 @@ package shared.responses.groups.policies
 import shared.responses.PaginatedResponse
 
 case class PoliciesAssociatedToGroupInfo(
-  user: String,
-  joined: String
+  policy: String,
+  attached: String
 )
 case class PoliciesAssociatedToGroupResponse(
   policies: List[PoliciesAssociatedToGroupInfo],

@@ -16,9 +16,11 @@ import diode.ActionResult.ModelUpdate
 import diode.react.ReactConnector
 import shared.requests.groups._
 import shared.requests.groups.members._
+import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
 import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, UpdatePolicyRequest}
 import shared.responses.groups.GroupDeleteResponse
 import shared.responses.groups.members.MemberAssociatedToGroupInfo
+import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
 import shared.responses.policies.DeletePolicyResponse
 import shared.responses.users.UserDeleteResponse
 
@@ -33,6 +35,12 @@ case class GroupMetadataWithMember(
     organizationId: String,
     name: String,
     memberInfo: Either[FoulkonError, List[MemberAssociatedToGroupInfo]]
+)
+
+case class GroupMetadataWithPolicy(
+  organizationId: String,
+  groupName: String,
+  policyInfo: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]
 )
 
 // Actions
@@ -53,10 +61,12 @@ case class UpdateAllGroups(groups: Either[FoulkonError, List[GroupDetail]])     
 case class UpdateGroup(organizationId: String, originalName: String, updatedName: String, updatedPath: String) extends Action
 case class CreateGroup(organizationId: String, name: String, path: String)                                     extends Action
 case class DeleteGroup(organizationId: String, name: String)                                                   extends Action
-case class UpdateGroupFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])                       extends Action
-case object RemoveGroupFeedbackReporting                                                                       extends Action
 case class RetrieveGroupMemberInfo(id: String, organizationId: String, name: String)                           extends Action
 case class UpdateGroupMemberInfo(id: String, groupMetadataWithMember: GroupMetadataWithMember)                 extends Action
+case class RetrieveGroupPolicyInfo(id: String, request: PoliciesAssociatedToGroupRequest)                      extends Action
+case class UpdateGroupPolicyInfo(id: String, groupMetadataWithPolicy: GroupMetadataWithPolicy)                 extends Action
+case class UpdateGroupFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])                       extends Action
+case object RemoveGroupFeedbackReporting                                                                       extends Action
 
 // Group members
 case class AddGroupMember(id: String, organizationId: String, name: String, userId: String)    extends Action
@@ -249,6 +259,17 @@ class GroupHandler[M](modelRW: ModelRW[M, Pot[Groups]]) extends ActionHandler(mo
             }
         )
       )
+    case RetrieveGroupPolicyInfo(id, request) =>
+      effectOnly(
+        Effect(
+          AjaxClient[Api]
+            .readPoliciesAssociatedToGroup(request)
+            .call
+            .map { response =>
+              UpdateGroupPolicyInfo(id, GroupMetadataWithPolicy(request.pathParams.organizationId, request.pathParams.groupName, response))
+            }
+        )
+      )
   }
 }
 class GroupFeedbackHandler[M](modelRW: ModelRW[M, Option[GroupFeedbackReporting]]) extends ActionHandler(modelRW) {
@@ -308,6 +329,15 @@ class GroupMemberFeedbackHandler[M](modelRW: ModelRW[M, Option[GroupMemberFeedba
     case RemoveGroupMemberFeedbackReporting =>
       updated(
         None
+      )
+  }
+}
+
+class GroupPolicyHandler[M](modelRW: ModelRW[M, Map[String, GroupMetadataWithPolicy]]) extends ActionHandler(modelRW) {
+  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
+    case UpdateGroupPolicyInfo(id, groupMetadataWithPolicy) =>
+      updated(
+        modelRW.value.updated(id, groupMetadataWithPolicy)
       )
   }
 }
@@ -393,6 +423,7 @@ case class GroupMemberFeedbackReporting(feedback: Either[FoulkonError, MessageFe
 case class GroupModule(
     groups: Pot[Groups],
     members: Map[String, GroupMetadataWithMember],
+    policies: Map[String, GroupMetadataWithPolicy],
     groupFeedbackReporting: Option[GroupFeedbackReporting],
     groupMemberFeedbackReporting: Option[GroupMemberFeedbackReporting]
 )
@@ -416,7 +447,7 @@ case class RootModel(
 // Application circuit
 object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def initialModel: RootModel =
-    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), None, None), PolicyModule(Empty, None))
+    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, None))
 
   override protected def actionHandler: SPACircuit.HandlerFunction = composeHandlers(
     new UserHandler(zoomRW(_.userModule.users)((m, v) => m.copy(userModule = m.userModule.copy(users = v)))),
@@ -427,6 +458,7 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
     new GroupMemberHandler(zoomRW(_.groupModule.members)((m, v) => m.copy(groupModule = m.groupModule.copy(members = v)))),
     new GroupMemberFeedbackHandler(
       zoomRW(_.groupModule.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupMemberFeedbackReporting = v)))),
+    new GroupPolicyHandler(zoomRW(_.groupModule.policies)((m, v) => m.copy(groupModule = m.groupModule.copy(policies = v)))),
     new PolicyHandler(zoomRW(_.policyModule.policies)((m, v) => m.copy(policyModule = m.policyModule.copy(policies = v)))),
     new PolicyFeedbackHandler(
       zoomRW(_.policyModule.policyFeedbackReporting)((m, v) => m.copy(policyModule = m.policyModule.copy(policyFeedbackReporting = v))))

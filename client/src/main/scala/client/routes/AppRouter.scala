@@ -5,6 +5,7 @@ import java.util.UUID
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
+import client.components.mui.groups.policies.GroupPoliciesComponent
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
 import client.components.mui.policies.{PoliciesComponent, PolicyFeedbackSnackbar}
 import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
@@ -25,6 +26,7 @@ object AppRouter {
   case object OidcProviderLocation          extends Location
   case object AuthoritationLocation         extends Location
   case class GroupMembersLocation(id: UUID) extends Location
+  case class GroupPoliciesLocation(id: UUID) extends Location
 
   // Configure the router
   val routerConfig: RouterConfig[Location] = RouterConfigDsl[Location]
@@ -39,6 +41,8 @@ object AppRouter {
 
       val groupMemberWrapper         = SPACircuit.connect(_.groupModule.members)
       val groupMemberFeedbackWrapper = SPACircuit.connect(_.groupModule.groupMemberFeedbackReporting)
+
+      val groupPolicyWrapper         = SPACircuit.connect(_.groupModule.policies)
 
       val policiesWrapper       = SPACircuit.connect(_.policyModule.policies)
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
@@ -80,16 +84,26 @@ object AppRouter {
         dynRenderR(
           (p: GroupMembersLocation, ctl) =>
             <.div(
-              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Members", 1))),
+              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Group members", 1))),
               MuiMuiThemeProvider()(groupMemberWrapper(groupMetadataWithMember => MembersComponent(p.id.toString, groupMetadataWithMember, ctl))),
               MuiMuiThemeProvider()(groupMemberFeedbackWrapper(GroupMemberFeedbackSnackbar(_)))
           )
+        )
+
+      val groupPoliciesRoute: Rule = dynamicRouteCT("#groups" / uuid.caseClass[GroupPoliciesLocation] / "policies") ~>
+        dynRenderR(
+          (p: GroupPoliciesLocation, ctl) =>
+            <.div(
+              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Group policies", 1))),
+              MuiMuiThemeProvider()(groupPolicyWrapper(groupMetadataWithPolicy => GroupPoliciesComponent(p.id.toString, groupMetadataWithPolicy, ctl)))
+            )
         )
 
       (emptyRule
         | usersRoute
         | groupsRoute
         | groupMembersRoute
+        | groupPoliciesRoute
         | policiesRoute).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
     }
     .renderWith(layout)

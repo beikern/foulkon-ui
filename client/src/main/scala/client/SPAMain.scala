@@ -3,6 +3,7 @@ package client
 import client.components.GlobalStyles
 import client.components.internal.ReactTapEventPlugin
 import client.components.mui.groups.members.{MemberCard, MembersComponent}
+import client.components.mui.groups.policies.{GroupPoliciesComponent, GroupPolicyCard}
 import client.components.mui.groups.{GroupCard, GroupsComponent}
 import client.components.mui.policies.{PoliciesComponent, PolicyCard, StatementCard}
 import client.components.mui.users.{UserCard, UsersComponent}
@@ -34,6 +35,9 @@ object SPAMain extends JSApp {
 
     GlobalRegistry.register(MemberCard.Style)
     GlobalRegistry.register(MembersComponent.Style)
+
+    GlobalRegistry.register(GroupPolicyCard.Style)
+    GlobalRegistry.register(GroupPoliciesComponent.Style)
 
     GlobalRegistry.register(PoliciesComponent.Style)
     GlobalRegistry.register(PolicyCard.Style)
