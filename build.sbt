@@ -1,4 +1,4 @@
-import sbt.Keys._
+import sbt.Keys.{version, _}
 import sbt.Project.projectToRef
 
 // a special crossProject for configuring a JS/JVM/shared structure
@@ -8,7 +8,7 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
     libraryDependencies ++= Settings.sharedDependencies.value
   )
   // set up settings specific to the JS project
-  .jsConfigure(_ enablePlugins ScalaJSWeb)
+  .jsConfigure(_.enablePlugins(ScalaJSWeb, ScalaJSBundlerPlugin))
 
 lazy val sharedJVM = shared.jvm.settings(name := "sharedJVM")
 
@@ -24,22 +24,30 @@ lazy val client: Project = (project in file("client"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
+    useYarn := true,
+    mainClass in Compile := Some("client.SPAMain"),
     libraryDependencies ++= Settings.scalajsDependencies.value,
-    // by default we do development build, no eliding
-    elideOptions := Seq(),
-    scalacOptions ++= elideOptions.value,
-    jsDependencies ++= Settings.jsDependencies.value,
-    // RuntimeDOM is needed for tests
-    jsDependencies += RuntimeDOM % "test",
-    // yes, we want to package JS dependencies
-    skip in packageJSDependencies := false,
-    // use Scala.js provided launcher code to start the client app
-    persistLauncher := true,
-    persistLauncher in Test := false,
-    // use uTest framework for tests
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    npmDependencies in Compile := Seq(
+      "react"                             -> Settings.versions.reactVersion,
+      "react-dom"                         -> Settings.versions.reactVersion,
+      "react-addons-create-fragment"      -> Settings.versions.reactVersion,
+      "react-addons-css-transition-group" -> Settings.versions.reactVersion,
+      "react-addons-pure-render-mixin"    -> Settings.versions.reactVersion,
+      "react-addons-transition-group"     -> Settings.versions.reactVersion,
+      "react-addons-update"               -> Settings.versions.reactVersion,
+      "material-ui"                       -> Settings.versions.MuiVersion,
+      "react-tap-event-plugin"            -> "2.0.1",
+      "jquery"                            -> Settings.versions.jQuery,
+      "bootstrap"                         -> Settings.versions.bootstrap
+    ),
+    npmDevDependencies in Compile += "expose-loader" -> "0.7.1",
+    webpackConfigFile := Some(baseDirectory.value/"webpack.config.js"),
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer.in(Test) := false,
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv,
+    webpackBundlingMode := BundlingMode.LibraryOnly()
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
   .dependsOn(sharedJS)
 
 // Client projects (just one in this case)
@@ -52,7 +60,8 @@ lazy val server = (project in file("server"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    libraryDependencies ++= Settings.jvmDependencies.value,
+    libraryDependencies ++= Settings.jvmDependencies.value ++ Seq(guice),
+    scalaJSProjects := Seq(client),
     commands += ReleaseCmd,
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
@@ -63,21 +72,21 @@ lazy val server = (project in file("server"))
     // compress CSS
     LessKeys.compress in Assets := true
   )
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)
 
 // Command for building a release
-lazy val ReleaseCmd = Command.command("release") {
-  state => "set elideOptions in client := Seq(\"-Xelide-below\", \"WARNING\")" ::
-    "client/clean" ::
-    "client/test" ::
-    "server/clean" ::
-    "server/test" ::
-    "server/dist" ::
-    "set elideOptions in client := Seq()" ::
-    state
+lazy val ReleaseCmd = Command.command("release") { state =>
+  "set elideOptions in client := Seq(\"-Xelide-below\", \"WARNING\")" ::
+  "client/clean" ::
+  "client/test" ::
+  "server/clean" ::
+  "server/test" ::
+  "server/dist" ::
+  "set elideOptions in client := Seq()" ::
+  state
 }
 
 // lazy val root = (project in file(".")).aggregate(client, server)

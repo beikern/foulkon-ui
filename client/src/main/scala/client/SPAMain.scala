@@ -1,59 +1,55 @@
 package client
 
 import client.components.GlobalStyles
-import client.modules.Dashboard
-import japgolly.scalajs.react.ReactDOM
+import client.components.internal.ReactTapEventPlugin
+import client.components.mui.groups.members.{MemberCard, MembersComponent}
+import client.components.mui.groups.policies.{GroupPoliciesComponent, GroupPolicyCard}
+import client.components.mui.groups.{GroupCard, GroupsComponent}
+import client.components.mui.policies.{PoliciesComponent, PolicyCard, StatementCard}
+import client.components.mui.users.{UserCard, UsersComponent}
 import japgolly.scalajs.react.extra.router._
-import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom
-import client.logger._
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSExport
-import scalacss.Defaults._
+import scala.scalajs.js.JSApp
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
+import scalacss.internal.mutable.GlobalRegistry
 
-@JSExport("SPAMain")
-object SPAMain extends js.JSApp {
+@JSExportTopLevel("SPAMain")
+object SPAMain extends JSApp {
 
-  // Define the locations (pages) used in this application
-  sealed trait Location
-
-  case object DashboardLocation extends Location
-
-  // Configure the router
-  val routerConfig: RouterConfig[Location] = RouterConfigDsl[Location].buildConfig { dsl =>
-      import dsl._
-    (staticRoute(root, DashboardLocation) ~> renderR(ctl => Dashboard("hello"))).notFound(redirectToPage(DashboardLocation)(Redirect.Replace))
-  }.renderWith(layout)
-
-
-  def layout(c: RouterCtl[Location], r: Resolution[Location]) = {
-    <.div(
-      // here we use plain Bootstrap class names as these are specific to the top level layout defined here
-      <.nav(^.className := "navbar navbar-inverse navbar-fixed-top",
-        <.div(^.className := "container",
-          <.div(^.className := "navbar-header", <.span(^.className := "navbar-brand", "SPA Tutorial")),
-          <.div(^.className := "collapse navbar-collapse")
-        )
-      ),
-      // currently active module is shown in this container
-      <.div(^.className := "container", r.render())
-    )
-  }
+  ReactTapEventPlugin(js.undefined)
 
   @JSExport
   def main(): Unit = {
-    log.warn("Application starting")
-    // send log messages also to the server
-    log.enableServerLogging("/logging")
-    log.info("This message goes to server as well")
+    import client.routes.AppRouter._
 
     // create stylesheet
+    GlobalRegistry.register(UserCard.Style) // TODO beikern: move to a loader method like scala-react-components does.
+    GlobalRegistry.register(UsersComponent.Style)
+
+    GlobalRegistry.register(GroupCard.Style)
+    GlobalRegistry.register(GroupsComponent.Style)
+
+    GlobalRegistry.register(MemberCard.Style)
+    GlobalRegistry.register(MembersComponent.Style)
+
+    GlobalRegistry.register(GroupPolicyCard.Style)
+    GlobalRegistry.register(GroupPoliciesComponent.Style)
+
+    GlobalRegistry.register(PoliciesComponent.Style)
+    GlobalRegistry.register(PolicyCard.Style)
+    GlobalRegistry.register(StatementCard.Style)
+
+    GlobalRegistry.addToDocumentOnRegistration()
+
     GlobalStyles.addToDocument()
     // create the router
     val router = Router(BaseUrl.until_#, routerConfig)
+
     // tell React to render the router in the document body
-    ReactDOM.render(router(), dom.document.getElementById("root"))
+    router.mapUnmounted(_.renderIntoDOM(dom.document.getElementById("root")))
   }
 }

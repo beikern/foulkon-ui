@@ -10,7 +10,7 @@ GET     /assets/fonts/*file               controllers.Assets.at(path="/public/li
 GET     /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)
 
 # Autowire calls
-# POST    /api/*path                        controllers.Application.autowireApi(path: String)
+POST    /api/*path                        controllers.Application.autowireApi(path)
 
 # Logging
 POST /logging                             controllers.Application.logging
