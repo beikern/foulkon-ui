@@ -94,7 +94,8 @@ object PoliciesComponent {
                       )(),
                       PolicyList(
                         policyDetails,
-                        (request) => p.proxy.dispatchCB(DeletePolicy(request))
+                        (request) => p.proxy.dispatchCB(DeletePolicy(request)),
+                        (request) => p.proxy.dispatchCB(UpdatePolicy(request))
                       )
                     )
                   )

@@ -2,10 +2,14 @@ package shared
 
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
 import shared.requests.groups._
-import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest}
-import shared.responses.groups.{AddMemberGroupResponse, GroupDeleteResponse, MemberInfo, RemoveMemberGroupResponse}
-import shared.responses.policies.DeletePolicyResponse
-import shared.responses.users.UserDeleteResponse
+import shared.requests.groups.members._
+import shared.responses.groups.members._
+import shared.responses.groups.policies._
+import shared.responses.groups._
+import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
+import shared.requests.policies._
+import shared.responses.policies._
+import shared.responses.users._
 
 import scala.concurrent.Future
 
@@ -19,10 +23,12 @@ trait Api {
   def readGroups(): Future[Either[FoulkonError, List[GroupDetail]]]
   def updateGroup(request: UpdateGroupRequest): Future[Either[FoulkonError, GroupDetail]]
   def deleteGroup (organizationId: String, name: String): Future[Either[FoulkonError, GroupDeleteResponse]]
-  def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberInfo]]]
+  def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberAssociatedToGroupInfo]]]
   def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]]
   def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]]
+  def readPoliciesAssociatedToGroup(request: PoliciesAssociatedToGroupRequest): Future[Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]]
   def readPolicies(): Future[Either[FoulkonError, List[PolicyDetail]]]
   def createPolicy(request: CreatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]
   def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]]
+  def updatePolicy(request: UpdatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]
 }

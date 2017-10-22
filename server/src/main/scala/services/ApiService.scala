@@ -8,14 +8,17 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import shared.{Api, FoulkonError}
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
-import shared.requests.groups._
-import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, GetPolicyRequest, GetPolicyRequestPathParams}
-import shared.responses.FoulkonErrorFromJson
-import shared.responses.groups._
-import shared.responses.policies.{CreatePolicyResponse, DeletePolicyResponse}
 import shared.responses.users._
+import shared.requests.groups._
+import shared.responses.groups._
+import shared.requests.groups.members._
+import shared.responses.groups.members._
+import shared.requests.groups.policies._
+import shared.responses.groups.policies._
+import shared.requests.policies._
+import shared.responses.policies._
+import shared.responses.FoulkonErrorFromJson
 import shared.utils.FoulkonErrorUtils
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -272,7 +275,7 @@ class ApiService(
         }
     }
   }
-  override def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberInfo]]] = {
+  override def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberAssociatedToGroupInfo]]] = {
     memberGroupRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -287,7 +290,7 @@ class ApiService(
         )
     }
   }
-  def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]] = {
+  override def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]] = {
     addMemberGroupRequest(request).send.map { response =>
       response.body
         .leftMap { error =>
@@ -297,7 +300,7 @@ class ApiService(
         }
     }
   }
-  def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]] = {
+  override def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]] = {
     removeMemberGroupRequest(request).send.map { response =>
       response.body
         .leftMap { error =>
@@ -307,10 +310,23 @@ class ApiService(
         }
     }
   }
-
+  def readPoliciesAssociatedToGroup(request: PoliciesAssociatedToGroupRequest): Future[Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]] = {
+    policiesAssociatedToGroupRequest(request).send().map { response =>
+      response.body
+        .bimap(
+          fa = error => {
+            val decodeError = decode[FoulkonErrorFromJson](error)
+              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
+          },
+          fb = responseEither => {
+            responseEither.right.get.policies
+          }
+        )
+    }
+  }
   // POLICIES
   override def createPolicy(request: CreatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]] = {
-
     createPolicyRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -406,7 +422,7 @@ class ApiService(
       }
     }
   }
-  def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]] = {
+  override def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]] = {
     deletePolicyRequest(request).send.map { response =>
       response.body
         .leftMap { error =>
@@ -414,6 +430,31 @@ class ApiService(
             .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
+    }
+  }
+  override def updatePolicy(request: UpdatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]] = {
+    updatePolicyRequest(request).send().map { response =>
+      response.body
+        .bimap(
+          fa = error => {
+            val decodeError = decode[FoulkonErrorFromJson](error)
+              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
+          },
+          fb = responseEither => {
+            val response = responseEither.right.get
+            PolicyDetail(
+              response.id,
+              response.name,
+              response.path,
+              response.createAt,
+              response.updateAt,
+              response.urn,
+              response.org,
+              response.statements
+            )
+          }
+        )
     }
   }
 }

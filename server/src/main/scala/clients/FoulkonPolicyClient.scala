@@ -1,11 +1,10 @@
 package clients
 
-import contexts.AkkaContext
-import io.circe.generic.auto._
 import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp.{sttp, _}
+import contexts.AkkaContext
+import io.circe.generic.auto._
 import shared.requests.policies._
-import shared.responses.groups.GroupDeleteResponse
 import shared.responses.policies._
 
 trait FoulkonPolicyClient extends FoulkonConfig { self: AkkaContext =>
@@ -43,4 +42,13 @@ trait FoulkonPolicyClient extends FoulkonConfig { self: AkkaContext =>
         .auth
         .basic(foulkonUser, foulkonPassword)
         .mapResponse(_ => DeletePolicyResponse(request.pathParams.organizationId, request.pathParams.policyName))
+  val updatePolicyRequest =
+  (request: UpdatePolicyRequest) =>
+    sttp
+      .body(request.body)
+      .put(uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/policies/${request.pathParams.policyName}")
+      .contentType("application/json")
+      .auth
+      .basic(foulkonUser, foulkonPassword)
+      .response(asJson[UpdatePolicyResponse])
 }

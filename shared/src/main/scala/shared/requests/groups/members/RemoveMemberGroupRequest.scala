@@ -1,4 +1,4 @@
-package shared.requests.groups
+package shared.requests.groups.members
 
 case class RemoveMemberGroupRequest(
     pathParams: RemoveMemberGroupRequestPathParams

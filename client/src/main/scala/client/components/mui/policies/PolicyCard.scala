@@ -1,21 +1,11 @@
 package client.components.mui.policies
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{
-  Mui,
-  MuiCard,
-  MuiCardActions,
-  MuiCardHeader,
-  MuiCardText,
-  MuiDivider,
-  MuiFlatButton,
-  MuiGridList,
-  MuiIconButton
-}
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.PolicyDetail
-import shared.requests.policies.DeletePolicyRequest
+import shared.requests.policies.{DeletePolicyRequest, UpdatePolicyRequest}
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -34,7 +24,8 @@ object PolicyCard {
 
   case class Props(
       policyDetail: PolicyDetail,
-      deletePolicyCallback: (DeletePolicyRequest) => Callback
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
   )
 
   case class State(
@@ -55,9 +46,9 @@ object PolicyCard {
       $.modState(s => s.copy(deleteDialogOpened = true))
     }
 
-//    def showUpdateGroupDialog(event: ReactEvent): Callback = {
-//      $.modState(s => s.copy(updateDialogOpened = true))
-//    }
+    def showUpdatePolicyDialog(event: ReactEvent): Callback = {
+      $.modState(s => s.copy(updateDialogOpened = true))
+    }
 
     def render(p: Props, s: State) = {
 
@@ -82,6 +73,15 @@ object PolicyCard {
           p.deletePolicyCallback,
           changeDeletePolicyStateCallback
         ),
+        <.div(
+          UpdatePolicyDialog(
+            p.policyDetail,
+            s.updateDialogOpened,
+            changeUpdatePolicyStateCallback,
+            p.updatePolicyCallback
+          )
+        )
+        ,
         MuiCard(expanded = js.defined(s.statementExpanded))(
           <.div(
             MuiGridList(cellHeight = js.defined(50))(
@@ -91,7 +91,7 @@ object PolicyCard {
               <.div(
                 Style.editDeleteButton,
                 MuiIconButton(
-//                  onClick = js.defined(showUpdateGroupDialog _)
+                  onClick = js.defined(showUpdatePolicyDialog _)
                 )(
                   Mui.SvgIcons.EditorModeEdit.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
                 ),
@@ -137,13 +137,15 @@ object PolicyCard {
     .build
 
   def apply(
-      policyDetail: PolicyDetail,
-      deletePolicyCallback: (DeletePolicyRequest) => Callback
+    policyDetail: PolicyDetail,
+    deletePolicyCallback: (DeletePolicyRequest) => Callback,
+    updatePolicyCallback: (UpdatePolicyRequest) => Callback
   ) =
     component(
       Props(
         policyDetail,
-        deletePolicyCallback
+        deletePolicyCallback,
+        updatePolicyCallback
       )
     )
 }

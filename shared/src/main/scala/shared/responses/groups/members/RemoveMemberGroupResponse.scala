@@ -1,4 +1,4 @@
-package shared.responses.groups
+package shared.responses.groups.members
 
 case class RemoveMemberGroupResponse(
  organizationId: String,

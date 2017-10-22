@@ -66,7 +66,7 @@ class Application @Inject()(
   }
 
   def index = Action {
-    Ok(views.html.index("SPA tutorial"))
+    Ok(views.html.index("Foulkon UI"))
   }
 
   def logging = Action(parse.anyContent) { request =>

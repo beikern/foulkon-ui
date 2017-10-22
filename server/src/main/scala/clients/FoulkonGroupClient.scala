@@ -5,7 +5,11 @@ import com.softwaremill.sttp.{sttp, _}
 import contexts.AkkaContext
 import io.circe.generic.auto._
 import shared.requests.groups._
+import shared.requests.groups.members.{AddMemberGroupRequest, MemberGroupRequest, RemoveMemberGroupRequest}
+import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
 import shared.responses.groups._
+import shared.responses.groups.members.{AddMemberGroupResponse, MemberGroupResponse, RemoveMemberGroupResponse}
+import shared.responses.groups.policies.PoliciesAssociatedToGroupResponse
 
 trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
   val listAllGroupsRequest =
@@ -83,4 +87,14 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
         .auth
         .basic(foulkonUser, foulkonPassword)
         .mapResponse(_ => RemoveMemberGroupResponse(request.pathParams.organizationId, request.pathParams.name, request.pathParams.userId))
+
+  val policiesAssociatedToGroupRequest =
+    (request: PoliciesAssociatedToGroupRequest) =>
+      sttp
+        .get(
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.groupName}/policies?Limit=1000")
+        .contentType("application/json")
+        .auth
+        .basic(foulkonUser, foulkonPassword)
+        .response(asJson[PoliciesAssociatedToGroupResponse])
 }

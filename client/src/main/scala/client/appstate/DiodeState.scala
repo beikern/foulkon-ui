@@ -15,8 +15,10 @@ import boopickle.Default._
 import diode.ActionResult.ModelUpdate
 import diode.react.ReactConnector
 import shared.requests.groups._
-import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest}
-import shared.responses.groups.{GroupDeleteResponse, MemberInfo}
+import shared.requests.groups.members._
+import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, UpdatePolicyRequest}
+import shared.responses.groups.GroupDeleteResponse
+import shared.responses.groups.members.MemberAssociatedToGroupInfo
 import shared.responses.policies.DeletePolicyResponse
 import shared.responses.users.UserDeleteResponse
 
@@ -30,7 +32,7 @@ case class UserWithGroup(
 case class GroupMetadataWithMember(
     organizationId: String,
     name: String,
-    memberInfo: Either[FoulkonError, List[MemberInfo]]
+    memberInfo: Either[FoulkonError, List[MemberAssociatedToGroupInfo]]
 )
 
 // Actions
@@ -69,6 +71,7 @@ case class UpdateAllPolicies(policies: Either[FoulkonError, List[PolicyDetail]])
 case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
 case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
 case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
+case class UpdatePolicy(request: UpdatePolicyRequest) extends Action
 
 // Handlers
 class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(modelRW) {
@@ -352,6 +355,18 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .map {
               case Left(foulkonError)                    => UpdatePolicyFeedbackReporting(Left(foulkonError))
               case Right(DeletePolicyResponse(org, nam)) => UpdatePolicyFeedbackReporting(Right(s"Policy $nam with org $org deleted successfully!"))
+            }
+        )
+      )
+    case UpdatePolicy(request) =>
+      effectOnly(
+        Effect(
+          AjaxClient[Api]
+            .updatePolicy(request)
+            .call
+            .map {
+              case Left(foulkonError)                          => UpdatePolicyFeedbackReporting(Left(foulkonError))
+              case Right(_) => UpdatePolicyFeedbackReporting(Right(s"policy updated successfully!"))
             }
         )
       )

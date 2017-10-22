@@ -3,13 +3,14 @@ package client.components.mui.policies
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.PolicyDetail
-import shared.requests.policies.DeletePolicyRequest
+import shared.requests.policies.{DeletePolicyRequest, UpdatePolicyRequest}
 
 object PolicyList {
 
   case class Props(
       policies: List[PolicyDetail],
-      deletePolicyCallback: (DeletePolicyRequest) => Callback
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
   )
 
   private val component = ScalaComponent
@@ -21,7 +22,8 @@ object PolicyList {
             <.div(^.className := "card-nested-padded",
                   PolicyCard(
                     policyDetail,
-                    p.deletePolicyCallback
+                    p.deletePolicyCallback,
+                    p.updatePolicyCallback
                   ))
           }.toTagMod
         )
@@ -30,12 +32,14 @@ object PolicyList {
     .build
 
   def apply(
-      policies: List[PolicyDetail],
-      deletePolicyCallback: (DeletePolicyRequest) => Callback
+    policies: List[PolicyDetail],
+    deletePolicyCallback: (DeletePolicyRequest) => Callback,
+    updatePolicyCallback: (UpdatePolicyRequest) => Callback
   ) = component(
     Props(
       policies,
-      deletePolicyCallback
+      deletePolicyCallback,
+      updatePolicyCallback
     )
   )
 }

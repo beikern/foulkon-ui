@@ -5,7 +5,7 @@ import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiGridList, MuiIconButton}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import shared.responses.groups.MemberInfo
+import shared.responses.groups.members.MemberAssociatedToGroupInfo
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -23,11 +23,11 @@ object MemberCard {
   }
 
   case class Props(
-      id: String,
-      organizationId: String,
-      groupName: String,
-      memberInfo: MemberInfo,
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+                    id: String,
+                    organizationId: String,
+                    groupName: String,
+                    memberInfo: MemberAssociatedToGroupInfo,
+                    removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   )
 
   case class State(
@@ -88,11 +88,11 @@ object MemberCard {
     .build
 
   def apply(
-      id: String,
-      organizationId: String,
-      groupName: String,
-      memberInfo: MemberInfo,
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+             id: String,
+             organizationId: String,
+             groupName: String,
+             memberInfo: MemberAssociatedToGroupInfo,
+             removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   ) =
     component(
       Props(
