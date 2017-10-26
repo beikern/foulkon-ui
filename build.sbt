@@ -24,7 +24,6 @@ lazy val client: Project = (project in file("client"))
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     scalacOptions ++= Settings.scalacOptions,
-    useYarn := true,
     mainClass in Compile := Some("client.SPAMain"),
     libraryDependencies ++= Settings.scalajsDependencies.value,
     npmDependencies in Compile := Seq(
@@ -35,6 +34,7 @@ lazy val client: Project = (project in file("client"))
       "react-addons-pure-render-mixin"    -> Settings.versions.reactVersion,
       "react-addons-transition-group"     -> Settings.versions.reactVersion,
       "react-addons-update"               -> Settings.versions.reactVersion,
+      "react-infinite"                    -> Settings.versions.reactInfinite,
       "material-ui"                       -> Settings.versions.MuiVersion,
       "react-tap-event-plugin"            -> "2.0.1",
       "jquery"                            -> Settings.versions.jQuery,

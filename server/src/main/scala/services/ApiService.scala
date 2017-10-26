@@ -352,8 +352,8 @@ class ApiService(
         )
     }
   }
-  override def readPolicies(): Future[Either[FoulkonError, List[PolicyDetail]]] = {
-    val listAllGroupsResponse = listAllPoliciesRequest.send().map { response =>
+  override def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, List[PolicyDetail]]] = {
+    val listAllPoliciesResponse = listAllPoliciesRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
@@ -367,12 +367,12 @@ class ApiService(
         )
     }
 
-    listAllGroupsResponse.onComplete {
+    listAllPoliciesResponse.onComplete {
       case Success(x)   => println(x)
       case Failure(err) => println(err)
     }
 
-    val apiResult = listAllGroupsResponse.flatMap { policiesListAllEither =>
+    val apiResult = listAllPoliciesResponse.flatMap { policiesListAllEither =>
       policiesListAllEither
         .map {
           _.policies.map { policyInfo =>

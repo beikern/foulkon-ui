@@ -9,8 +9,9 @@ import shared.responses.policies._
 
 trait FoulkonPolicyClient extends FoulkonConfig { self: AkkaContext =>
   val listAllPoliciesRequest =
+    (request: ReadPoliciesRequest) =>
     sttp
-      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/policies?Limit=1000")
+      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/policies?Offset=${request.offset}&Limit=${request.limit}")
       .contentType("application/json")
       .auth
       .basic(foulkonUser, foulkonPassword)

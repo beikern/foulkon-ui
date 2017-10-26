@@ -17,7 +17,7 @@ import diode.react.ReactConnector
 import shared.requests.groups._
 import shared.requests.groups.members._
 import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
-import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, UpdatePolicyRequest}
+import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}
 import shared.responses.groups.GroupDeleteResponse
 import shared.responses.groups.members.MemberAssociatedToGroupInfo
 import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
@@ -76,8 +76,8 @@ case class UpdateGroupMemberFeedbackReporting(id: String, organizationId: String
 case object RemoveGroupMemberFeedbackReporting extends Action
 
 // Policies
-case object RefreshPolicies                                                               extends Action
-case class UpdateAllPolicies(policies: Either[FoulkonError, List[PolicyDetail]])          extends Action
+case class RefreshPolicies(request: ReadPoliciesRequest)                                                               extends Action
+case class AddNewPolicies(policies: Either[FoulkonError, List[PolicyDetail]])          extends Action
 case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
 case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
 case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
@@ -196,6 +196,7 @@ class GroupHandler[M](modelRW: ModelRW[M, Pot[Groups]]) extends ActionHandler(mo
         )
       )
     case UpdateAllGroups(groups) =>
+      println("updateAllGroups executed")
       updated(
         Ready(
           Groups(groups)
@@ -344,26 +345,38 @@ class GroupPolicyHandler[M](modelRW: ModelRW[M, Map[String, GroupMetadataWithPol
 
 class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case RefreshPolicies =>
+    case RefreshPolicies(request) =>
       effectOnly(
         Effect(
           AjaxClient[Api]
-            .readPolicies()
+            .readPolicies(request)
             .call
             .map(
               policiesDetailEither =>
-                UpdateAllPolicies(
+                AddNewPolicies(
                   policiesDetailEither
               )
             )
         )
       )
-    case UpdateAllPolicies(policies) =>
-      updated(
-        Ready(
-          Policies(policies)
+    case AddNewPolicies(policies) =>
+      if (modelRW.value.isEmpty) {
+        updated(
+          Ready(Policies(policies))
         )
-      )
+      } else {
+        val concatResult = modelRW.value.map(
+          _.policies.flatMap{ statePolicyList =>
+            policies.map( addNewPoliciesList =>
+              statePolicyList:::addNewPoliciesList
+            )
+          }
+        )
+        updated(
+          concatResult.map(Policies)
+        )
+      }
+
     case CreatePolicy(request) =>
       effectOnly(
         Effect(
@@ -406,7 +419,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
 class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReporting]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case UpdatePolicyFeedbackReporting(feedback) =>
-      updated(Some(PolicyFeedbackReporting(feedback)), Effect(Future(RefreshPolicies)))
+      updated(Some(PolicyFeedbackReporting(feedback))/*, Effect(Future(RefreshPolicies))*/)
   }
 }
 

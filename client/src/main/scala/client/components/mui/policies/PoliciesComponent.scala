@@ -10,6 +10,7 @@ import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
+import shared.requests.policies.ReadPoliciesRequest
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -38,7 +39,7 @@ object PoliciesComponent {
     }
 
     def mounted(props: Props) =
-      Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshPolicies))
+      Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshPolicies(ReadPoliciesRequest(0,1))))
 
     def render(p: Props, s: State) = {
       <.div(
@@ -95,7 +96,8 @@ object PoliciesComponent {
                       PolicyList(
                         policyDetails,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),
-                        (request) => p.proxy.dispatchCB(UpdatePolicy(request))
+                        (request) => p.proxy.dispatchCB(UpdatePolicy(request)),
+                        (request) => p.proxy.dispatchCB(RefreshPolicies(request))
                       )
                     )
                   )

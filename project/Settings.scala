@@ -47,6 +47,7 @@ object Settings {
     // js dependencies
     val MuiVersion   = "0.17.0"
     val reactVersion = "15.4.2"
+    val reactInfinite = "0.10.0"
   }
 
   /**
