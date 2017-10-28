@@ -22,10 +22,10 @@ object GroupPolicyCard {
   }
 
   case class Props(
-    id: String,
-    organizationId: String,
-    groupName: String,
-    policyInfo: PoliciesAssociatedToGroupInfo
+      id: String,
+      organizationId: String,
+      groupName: String,
+      policyInfo: PoliciesAssociatedToGroupInfo
   )
 
   case class State(
@@ -77,10 +77,10 @@ object GroupPolicyCard {
     .build
 
   def apply(
-     id: String,
-     organizationId: String,
-     groupName: String,
-     policyInfo: PoliciesAssociatedToGroupInfo
+      id: String,
+      organizationId: String,
+      groupName: String,
+      policyInfo: PoliciesAssociatedToGroupInfo
   ) =
     component(
       Props(

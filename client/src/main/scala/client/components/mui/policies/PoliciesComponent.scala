@@ -49,7 +49,8 @@ object PoliciesComponent {
       <.div(
         p.proxy().policies.renderFailed(ex => "Error loading"),
         p.proxy().policies.renderPending(_ > 500, _ => "Loading..."),
-        p.proxy().policies
+        p.proxy()
+          .policies
           .renderEmpty(
             <.div(
               ^.className := "card-padded",
@@ -66,7 +67,8 @@ object PoliciesComponent {
               )
             )
           ),
-        p.proxy().policies
+        p.proxy()
+          .policies
           .render(
             policiesFromProxy => {
               policiesFromProxy.policies match {

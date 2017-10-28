@@ -34,19 +34,23 @@ object PolicyList {
         Callback.unless(p.offset >= p.total)(p.retrieveNextPoliciesCallback(request))
       }
 
-      <.div(^.style:= scala.scalajs.js.Dynamic.literal("overflowAnchor" -> "none"), //https://github.com/utatti/perfect-scrollbar/issues/612 react-infinite has the same problem using Chrome.
-        ReactInfinite(elementHeight = 300,
+      <.div(
+        ^.style := scala.scalajs.js.Dynamic
+          .literal("overflowAnchor" -> "none"), //https://github.com/utatti/perfect-scrollbar/issues/612 react-infinite has the same problem using Chrome.
+        ReactInfinite(
+          elementHeight = 300,
           onInfiniteLoad = js.defined(handleInfiniteLoad),
           infiniteLoadBeginEdgeOffset = js.defined(5),
-          timeScrollStateLastsForAfterUserScrolls = js.defined(1000))(
+          timeScrollStateLastsForAfterUserScrolls = js.defined(1000)
+        )(
           p.policies.map { policyDetail =>
             <.div(^.className := "card-nested-padded",
-              PolicyCard(
-                p.router,
-                policyDetail,
-                p.deletePolicyCallback,
-                p.updatePolicyCallback
-              )):VdomElement
+                  PolicyCard(
+                    p.router,
+                    policyDetail,
+                    p.deletePolicyCallback,
+                    p.updatePolicyCallback
+                  )): VdomElement
           }
         )
       )
@@ -60,13 +64,13 @@ object PolicyList {
     .build
 
   def apply(
-    router: RouterCtl[Location],
-    policies: List[PolicyDetail],
-    offset: Offset,
-    total: Total,
-    deletePolicyCallback: (DeletePolicyRequest) => Callback,
-    updatePolicyCallback: (UpdatePolicyRequest) => Callback,
-    retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
+      router: RouterCtl[Location],
+      policies: List[PolicyDetail],
+      offset: Offset,
+      total: Total,
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback,
+      retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
   ) = component(
     Props(
       router,

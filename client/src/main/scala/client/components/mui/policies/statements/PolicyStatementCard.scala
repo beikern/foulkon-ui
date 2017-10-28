@@ -28,12 +28,11 @@ object PolicyStatementCard {
           )
         )
 
-      val actionsToRender = p.statementDetail.actions.map {
-          action =>
-            MuiCardText()(
-              <.div(action)
-            ):VdomNode
-          }
+      val actionsToRender = p.statementDetail.actions.map { action =>
+        MuiCardText()(
+          <.div(action)
+        ): VdomNode
+      }
 
       val actionCard =
         MuiCard()(
@@ -44,11 +43,10 @@ object PolicyStatementCard {
           )
         )
 
-      val resourcesToRender = p.statementDetail.resources.map {
-        resource =>
-          MuiCardText()(
-            <.div(resource)
-          ):VdomNode
+      val resourcesToRender = p.statementDetail.resources.map { resource =>
+        MuiCardText()(
+          <.div(resource)
+        ): VdomNode
       }
 
       val resourceCard =
@@ -60,22 +58,16 @@ object PolicyStatementCard {
           )
         )
 
-        MuiCard()(
-          <.div(
-            MuiCardHeader(
-              title = <.span(<.b(s"Statement ${p.number}")).render
-            )()
-          ),
-          <.div(^.className := "card-nested-padded",
-            effectCard
-          ),
-          <.div(^.className := "card-nested-padded",
-            actionCard
-          ),
-          <.div(^.className := "card-nested-padded",
-            resourceCard
-          )
-        )
+      MuiCard()(
+        <.div(
+          MuiCardHeader(
+            title = <.span(<.b(s"Statement ${p.number}")).render
+          )()
+        ),
+        <.div(^.className := "card-nested-padded", effectCard),
+        <.div(^.className := "card-nested-padded", actionCard),
+        <.div(^.className := "card-nested-padded", resourceCard)
+      )
 
     }
   }
@@ -87,8 +79,8 @@ object PolicyStatementCard {
     .build
 
   def apply(
-    number: Int,
-    statementDetail: Statement
+      number: Int,
+      statementDetail: Statement
   ) =
     component(
       Props(

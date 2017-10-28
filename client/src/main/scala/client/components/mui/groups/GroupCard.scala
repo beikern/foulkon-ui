@@ -4,7 +4,17 @@ package components.mui.groups
 import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import chandu0101.scalajs.react.components.materialui.{
+  Mui,
+  MuiCard,
+  MuiCardActions,
+  MuiCardHeader,
+  MuiCardText,
+  MuiDivider,
+  MuiFlatButton,
+  MuiGridList,
+  MuiIconButton
+}
 import client.routes.AppRouter.{GroupMembersLocation, GroupPoliciesLocation, Location}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -115,7 +125,11 @@ object GroupCard {
               primary = js.defined(true),
               label = js.defined("policies"),
               href = js.defined(p.router.urlFor(GroupPoliciesLocation(UUID.fromString(p.groupDetail.id))).value),
-              onClick = js.defined((_) => p.retrieveGroupPoliciesInfoCallback(p.groupDetail.id, PoliciesAssociatedToGroupRequest(PoliciesAssociatedToGroupRequestPathParams(p.groupDetail.org, p.groupDetail.name))))
+              onClick = js.defined(
+                (_) =>
+                  p.retrieveGroupPoliciesInfoCallback(
+                    p.groupDetail.id,
+                    PoliciesAssociatedToGroupRequest(PoliciesAssociatedToGroupRequestPathParams(p.groupDetail.org, p.groupDetail.name))))
             )()
           )
         )
@@ -136,7 +150,7 @@ object GroupCard {
       deleteGroup: (GroupOrg, GroupName) => Callback,
       retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
       retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback
-           ) =
+  ) =
     component(
       Props(
         groupDetail,

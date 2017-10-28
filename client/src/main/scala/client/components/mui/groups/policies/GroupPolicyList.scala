@@ -7,10 +7,10 @@ import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
 object GroupPolicyList {
 
   case class Props(
-    id: String,
-    organizationId: String,
-    groupName: String,
-    policies: List[PoliciesAssociatedToGroupInfo]
+      id: String,
+      organizationId: String,
+      groupName: String,
+      policies: List[PoliciesAssociatedToGroupInfo]
   )
 
   private val component = ScalaComponent
@@ -33,10 +33,10 @@ object GroupPolicyList {
     .build
 
   def apply(
-    id: String,
-    organizationId: String,
-    groupName: String,
-    policies: List[PoliciesAssociatedToGroupInfo]
+      id: String,
+      organizationId: String,
+      groupName: String,
+      policies: List[PoliciesAssociatedToGroupInfo]
   ) = component(
     Props(
       id,

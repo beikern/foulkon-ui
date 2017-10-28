@@ -24,12 +24,11 @@ object PolicyStatementsComponent {
 
     def render(p: Props, s: State) = {
       val statements: Pot[Either[FoulkonError, Option[List[Statement]]]] =
-        p.proxy.value.map{
-          policyListEither =>
-            policyListEither.map{
-              case (_, policyList) =>
+        p.proxy.value.map { policyListEither =>
+          policyListEither.map {
+            case (_, policyList) =>
               policyList.find(_.id == p.id).map(_.statements)
-            }
+          }
         }
       <.div(
         statements.renderFailed(ex => "Error loading"),
@@ -66,8 +65,7 @@ object PolicyStatementsComponent {
               MuiCardHeader(
                 title = <.span(<.b(s"Policy ${p.id} statements")).render
               )(),
-              MuiCardText()(<.div(
-                s"Can't find the policy ${p.id}, statements can't be showed."))
+              MuiCardText()(<.div(s"Can't find the policy ${p.id}, statements can't be showed."))
             )
           case Right(Some(statementList)) =>
             <.div(
@@ -91,7 +89,7 @@ object PolicyStatementsComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(id: String, proxy: ModelProxy[Pot[Either[FoulkonError, (Total, List[PolicyDetail])]]], router: RouterCtl[Location]
-  ) = component(Props(id, proxy, router))
+  def apply(id: String, proxy: ModelProxy[Pot[Either[FoulkonError, (Total, List[PolicyDetail])]]], router: RouterCtl[Location]) =
+    component(Props(id, proxy, router))
 
 }

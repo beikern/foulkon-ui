@@ -29,15 +29,17 @@ object GroupList {
             groups
               .map(
                 group =>
-                  <.div(^.className := "card-padded",
-                        GroupCard(
-                          group,
-                          p.router,
-                          p.updateGroupCallback,
-                          p.deleteGroupCallback,
-                          p.retrieveGroupMemberInfoCallback,
-                          p.retrieveGroupPoliciesInfoCallback
-                        ))
+                  <.div(
+                    ^.className := "card-padded",
+                    GroupCard(
+                      group,
+                      p.router,
+                      p.updateGroupCallback,
+                      p.deleteGroupCallback,
+                      p.retrieveGroupMemberInfoCallback,
+                      p.retrieveGroupPoliciesInfoCallback
+                    )
+                )
               )
               .toTagMod
           case Left(error) => <.div(error.toString) // TODO beikern arreglar, mostrar una card de error
@@ -52,5 +54,6 @@ object GroupList {
             deleteGroupCallback: (GroupOrg, GroupName) => Callback,
             retrieveGroupMemberInfoCallback: (String, GroupOrg, GroupName) => Callback,
             retrieveGroupPoliciesInfoCallback: (String, PoliciesAssociatedToGroupRequest) => Callback) =
-    GroupList(Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback, retrieveGroupPoliciesInfoCallback))
+    GroupList(
+      Props(groupsEither, router, updateGroupCallback, deleteGroupCallback, retrieveGroupMemberInfoCallback, retrieveGroupPoliciesInfoCallback))
 }

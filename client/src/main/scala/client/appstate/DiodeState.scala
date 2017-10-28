@@ -37,9 +37,9 @@ case class GroupMetadataWithMember(
 )
 
 case class GroupMetadataWithPolicy(
-  organizationId: String,
-  groupName: String,
-  policyInfo: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]
+    organizationId: String,
+    groupName: String,
+    policyInfo: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]
 )
 
 // Actions

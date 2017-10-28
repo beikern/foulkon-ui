@@ -14,12 +14,9 @@ object PolicyStatementList {
   class Backend($ : BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       val statementsToRender =
-        p.statements.
-          zipWithIndex.map{
+        p.statements.zipWithIndex.map {
           case (statement, index) =>
-            <.div(^.className := "card-nested-padded",
-              PolicyStatementCard(index, statement)
-            ):VdomElement
+            <.div(^.className := "card-nested-padded", PolicyStatementCard(index, statement)): VdomElement
         }
       <.div(statementsToRender: _*)
     }
@@ -32,7 +29,7 @@ object PolicyStatementList {
     .build
 
   def apply(
-    statements: List[Statement]
+      statements: List[Statement]
   ) = component(
     Props(
       statements

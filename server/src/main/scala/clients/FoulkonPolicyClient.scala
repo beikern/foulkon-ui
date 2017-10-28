@@ -10,12 +10,12 @@ import shared.responses.policies._
 trait FoulkonPolicyClient extends FoulkonConfig { self: AkkaContext =>
   val listAllPoliciesRequest =
     (request: ReadPoliciesRequest) =>
-    sttp
-      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/policies?Offset=${request.offset}&Limit=${request.limit}")
-      .contentType("application/json")
-      .auth
-      .basic(foulkonUser, foulkonPassword)
-      .response(asJson[PoliciesListAllResponse])
+      sttp
+        .get(uri"http://$foulkonHost:$foulkonPort/api/v1/policies?Offset=${request.offset}&Limit=${request.limit}")
+        .contentType("application/json")
+        .auth
+        .basic(foulkonUser, foulkonPassword)
+        .response(asJson[PoliciesListAllResponse])
   val policyDetailRequest =
     (request: GetPolicyRequest) =>
       sttp
@@ -44,12 +44,13 @@ trait FoulkonPolicyClient extends FoulkonConfig { self: AkkaContext =>
         .basic(foulkonUser, foulkonPassword)
         .mapResponse(_ => DeletePolicyResponse(request.pathParams.organizationId, request.pathParams.policyName))
   val updatePolicyRequest =
-  (request: UpdatePolicyRequest) =>
-    sttp
-      .body(request.body)
-      .put(uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/policies/${request.pathParams.policyName}")
-      .contentType("application/json")
-      .auth
-      .basic(foulkonUser, foulkonPassword)
-      .response(asJson[UpdatePolicyResponse])
+    (request: UpdatePolicyRequest) =>
+      sttp
+        .body(request.body)
+        .put(
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/policies/${request.pathParams.policyName}")
+        .contentType("application/json")
+        .auth
+        .basic(foulkonUser, foulkonPassword)
+        .response(asJson[UpdatePolicyResponse])
 }

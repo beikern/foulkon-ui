@@ -20,14 +20,14 @@ object AppRouter {
 
   sealed trait Location
 
-  case object UsersLocation                 extends Location
-  case object GroupsLocation                extends Location
-  case object PoliciesLocation              extends Location
-  case object ProxyResourcesLocation        extends Location
-  case object OidcProviderLocation          extends Location
-  case object AuthoritationLocation         extends Location
-  case class GroupMembersLocation(id: UUID) extends Location
-  case class GroupPoliciesLocation(id: UUID) extends Location
+  case object UsersLocation                     extends Location
+  case object GroupsLocation                    extends Location
+  case object PoliciesLocation                  extends Location
+  case object ProxyResourcesLocation            extends Location
+  case object OidcProviderLocation              extends Location
+  case object AuthoritationLocation             extends Location
+  case class GroupMembersLocation(id: UUID)     extends Location
+  case class GroupPoliciesLocation(id: UUID)    extends Location
   case class PolicyStatementsLocation(id: UUID) extends Location
   // Configure the router
   val routerConfig: RouterConfig[Location] = RouterConfigDsl[Location]
@@ -43,10 +43,10 @@ object AppRouter {
       val groupMemberWrapper         = SPACircuit.connect(_.groupModule.members)
       val groupMemberFeedbackWrapper = SPACircuit.connect(_.groupModule.groupMemberFeedbackReporting)
 
-      val groupPolicyWrapper         = SPACircuit.connect(_.groupModule.policies)
+      val groupPolicyWrapper = SPACircuit.connect(_.groupModule.policies)
 
-      val policyModuleWrapper       = SPACircuit.connect(_.policyModule)
-      val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
+      val policyModuleWrapper = SPACircuit.connect(_.policyModule)
+      val policiesWrapper     = SPACircuit.connect(_.policyModule.policies)
 
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
@@ -81,7 +81,7 @@ object AppRouter {
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Group members", 1))),
               MuiMuiThemeProvider()(groupMemberWrapper(groupMetadataWithMember => MembersComponent(p.id.toString, groupMetadataWithMember, ctl))),
               MuiMuiThemeProvider()(groupMemberFeedbackWrapper(GroupMemberFeedbackSnackbar(_)))
-            )
+          )
         )
 
       val groupPoliciesRoute: Rule = dynamicRouteCT("#groups" / uuid.caseClass[GroupPoliciesLocation] / "policies") ~>
@@ -89,8 +89,9 @@ object AppRouter {
           (p: GroupPoliciesLocation, ctl) =>
             <.div(
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Group policies", 1))),
-              MuiMuiThemeProvider()(groupPolicyWrapper(groupMetadataWithPolicy => GroupPoliciesComponent(p.id.toString, groupMetadataWithPolicy, ctl)))
-            )
+              MuiMuiThemeProvider()(
+                groupPolicyWrapper(groupMetadataWithPolicy => GroupPoliciesComponent(p.id.toString, groupMetadataWithPolicy, ctl)))
+          )
         )
 
       // POLICIES
@@ -110,8 +111,9 @@ object AppRouter {
           (p: PolicyStatementsLocation, ctl) =>
             <.div(
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policy statements", 1))),
-              MuiMuiThemeProvider()(policiesWrapper(policyProxy => PolicyStatementsComponent(p.id.toString, policyProxy.zoom(_.map(_.policies)), ctl)))
-            )
+              MuiMuiThemeProvider()(
+                policiesWrapper(policyProxy => PolicyStatementsComponent(p.id.toString, policyProxy.zoom(_.map(_.policies)), ctl)))
+          )
         )
 
       (emptyRule
