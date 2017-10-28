@@ -1,8 +1,12 @@
 package client.components.mui.policies
 
+import java.util.UUID
+
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import client.routes.AppRouter.{Location, PolicyStatementsLocation}
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.PolicyDetail
 import shared.requests.policies.{DeletePolicyRequest, UpdatePolicyRequest}
@@ -23,6 +27,7 @@ object PolicyCard {
   }
 
   case class Props(
+      router: RouterCtl[Location],
       policyDetail: PolicyDetail,
       deletePolicyCallback: (DeletePolicyRequest) => Callback,
       updatePolicyCallback: (UpdatePolicyRequest) => Callback
@@ -51,21 +56,6 @@ object PolicyCard {
     }
 
     def render(p: Props, s: State) = {
-
-      def toggleStatement(event: ReactEvent): Callback = {
-        $.modState(s => s.copy(statementExpanded = !s.statementExpanded))
-      }
-
-      val statementsToRender = p.policyDetail.statements.map { statement =>
-        MuiCard()(
-          MuiCardText()(
-            <.p(<.b("effect: "), s"${statement.effect}"),
-            <.p(<.b("actions: "), s"${statement.actions.mkString(", ")}"),
-            <.p(<.b("resources: "), s"${statement.resources.mkString(", ")}")
-          )
-        ): VdomNode
-      }
-
       <.div(
         AreYouSureRemovePolicyDialog(
           p.policyDetail,
@@ -117,13 +107,8 @@ object PolicyCard {
             MuiFlatButton(
               label = js.defined("STATEMENTS"),
               primary = js.defined(true),
-              onClick = js.defined(toggleStatement _)
+              href = js.defined(p.router.urlFor(PolicyStatementsLocation(UUID.fromString(p.policyDetail.id))).value)
             )()
-          ),
-          MuiCardText(expandable = js.defined(true))(
-            MuiGridList(cols = js.defined(2), padding = js.defined(8))(
-              statementsToRender: _*
-            )
           )
         )
       )
@@ -137,12 +122,14 @@ object PolicyCard {
     .build
 
   def apply(
+    router: RouterCtl[Location],
     policyDetail: PolicyDetail,
     deletePolicyCallback: (DeletePolicyRequest) => Callback,
     updatePolicyCallback: (UpdatePolicyRequest) => Callback
   ) =
     component(
       Props(
+        router,
         policyDetail,
         deletePolicyCallback,
         updatePolicyCallback

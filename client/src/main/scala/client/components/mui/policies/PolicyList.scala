@@ -1,7 +1,9 @@
 package client.components.mui.policies
 
 import client.components.others.ReactInfinite
+import client.routes.AppRouter.Location
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.{Offset, Total}
 import shared.entities.PolicyDetail
@@ -12,6 +14,7 @@ import scala.scalajs.js
 object PolicyList {
 
   case class Props(
+      router: RouterCtl[Location],
       policies: List[PolicyDetail],
       offset: Offset,
       total: Total,
@@ -39,6 +42,7 @@ object PolicyList {
           p.policies.map { policyDetail =>
             <.div(^.className := "card-nested-padded",
               PolicyCard(
+                p.router,
                 policyDetail,
                 p.deletePolicyCallback,
                 p.updatePolicyCallback
@@ -56,6 +60,7 @@ object PolicyList {
     .build
 
   def apply(
+    router: RouterCtl[Location],
     policies: List[PolicyDetail],
     offset: Offset,
     total: Total,
@@ -64,6 +69,7 @@ object PolicyList {
     retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
   ) = component(
     Props(
+      router,
       policies,
       offset,
       total,

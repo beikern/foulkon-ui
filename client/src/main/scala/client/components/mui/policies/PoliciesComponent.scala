@@ -3,7 +3,7 @@ package client.components.mui.policies
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
 import client.appstate._
-import client.appstate.policies.{CreatePolicy, DeletePolicy, RefreshPolicies, UpdatePolicy}
+import client.appstate.policies.{CreatePolicy, DeletePolicy, FetchPoliciesToConcat, UpdatePolicy}
 import client.routes.AppRouter.Location
 import diode.react.ReactPot._
 import diode.react._
@@ -43,7 +43,7 @@ object PoliciesComponent {
     }
 
     def mounted(props: Props) =
-      Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(RefreshPolicies(ReadPoliciesRequest())))
+      Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(FetchPoliciesToConcat(ReadPoliciesRequest())))
 
     def render(p: Props, s: State) = {
       <.div(
@@ -98,12 +98,13 @@ object PoliciesComponent {
                         title = <.span(<.b(s"Policies")).render
                       )(),
                       PolicyList(
+                        p.router,
                         policyDetails,
                         p.proxy().offset,
                         total,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),
                         (request) => p.proxy.dispatchCB(UpdatePolicy(request)),
-                        (request) => p.proxy.dispatchCB(RefreshPolicies(request))
+                        (request) => p.proxy.dispatchCB(FetchPoliciesToConcat(request))
                       )
                     )
                   )

@@ -17,37 +17,40 @@ import shared.responses.policies.DeletePolicyResponse
 import scala.concurrent.Future
 
 // Policies Actions
-case class RefreshPolicies(request: ReadPoliciesRequest)                                  extends Action
-case class AddNewPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])    extends Action
+case object FetchPoliciesToReset                                                          extends Action
+case class ResetPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])     extends Action
+case class FetchPoliciesToConcat(request: ReadPoliciesRequest)                            extends Action
+case class ConcatNewPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])]) extends Action
 case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
 case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
 case class UpdatePolicy(request: UpdatePolicyRequest)                                     extends Action
 case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case class UpdatePolicyOffset(updatedOffset: Offset)                                      extends Action
+case class UpdatePolicyOffset(updatedOffset: Offset, offsetMustBeReseted: Boolean)        extends Action
 
 // Policies Handlers
 class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case RefreshPolicies(request) =>
+    case FetchPoliciesToReset =>
       effectOnly(
         Effect(
           AjaxClient[Api]
-            .readPolicies(request)
+            .readPolicies(ReadPoliciesRequest())
             .call
             .map(
               policiesDetailEither =>
-                AddNewPolicies(
+                ConcatNewPolicies(
                   policiesDetailEither
               )
             )
         )
       )
-    case AddNewPolicies(policies) =>
+    case ResetPolicies(policies) =>
       policies match {
         case Right((total, addNewPoliciesList)) =>
           if (modelRW.value.isEmpty) {
             updated(
-              Ready(Policies(policies)), Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size)))
+              Ready(Policies(policies)),
+              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = true)))
             )
           } else {
             val concatResult = modelRW.value.map(
@@ -56,20 +59,60 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
                   total -> (statePolicyList ::: addNewPoliciesList)
               }
             )
-            println(UpdatePolicyOffset(addNewPoliciesList.size))
             updated(
               concatResult.map(Policies),
-              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size)))
+              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = true)))
             )
           }
         case error @ Left(foulkonError) =>
           updated(
             Ready(Policies(error)),
             Effect(
-              Future(UpdatePolicyOffset(0))
+              Future(UpdatePolicyOffset(0, offsetMustBeReseted = true))
             )
           )
-
+      }
+    case FetchPoliciesToConcat(request) =>
+      effectOnly(
+        Effect(
+          AjaxClient[Api]
+            .readPolicies(request)
+            .call
+            .map(
+              policiesDetailEither =>
+                ConcatNewPolicies(
+                  policiesDetailEither
+              )
+            )
+        )
+      )
+    case ConcatNewPolicies(policies) =>
+      policies match {
+        case Right((total, addNewPoliciesList)) =>
+          if (modelRW.value.isEmpty) {
+            updated(
+              Ready(Policies(policies)),
+              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = false)))
+            )
+          } else {
+            val concatResult = modelRW.value.map(
+              _.policies.map {
+                case (_, statePolicyList) =>
+                  total -> (statePolicyList ::: addNewPoliciesList)
+              }
+            )
+            updated(
+              concatResult.map(Policies),
+              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = false)))
+            )
+          }
+        case error @ Left(foulkonError) =>
+          updated(
+            Ready(Policies(error)),
+            Effect(
+              Future(UpdatePolicyOffset(0, offsetMustBeReseted = false))
+            )
+          )
       }
 
     case CreatePolicy(request) =>
@@ -114,18 +157,17 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
 class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReporting]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case UpdatePolicyFeedbackReporting(feedback) =>
-      updated(Some(PolicyFeedbackReporting(feedback)) /*, Effect(Future(RefreshPolicies))*/ )
+      updated(Some(PolicyFeedbackReporting(feedback)) , Effect(Future(FetchPoliciesToReset)) )
   }
 }
 
 class PolicyOffsetHandler[M](modelRW: ModelRW[M, Offset]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case UpdatePolicyOffset(offset) =>
-      if(offset == 0) {
-        updated(offset)
-      } else {
-        println("policyoffsethandler" + (modelRW.value + offset))
+    case UpdatePolicyOffset(0, _) =>
+        updated(0)
+    case UpdatePolicyOffset(offset, false) =>
         updated(modelRW.value + offset)
-      }
-  }
+    case UpdatePolicyOffset(offset, true) =>
+      updated(offset)
+    }
 }
