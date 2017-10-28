@@ -157,17 +157,17 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
 class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReporting]]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case UpdatePolicyFeedbackReporting(feedback) =>
-      updated(Some(PolicyFeedbackReporting(feedback)) , Effect(Future(FetchPoliciesToReset)) )
+      updated(Some(PolicyFeedbackReporting(feedback)), Effect(Future(FetchPoliciesToReset)))
   }
 }
 
 class PolicyOffsetHandler[M](modelRW: ModelRW[M, Offset]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
     case UpdatePolicyOffset(0, _) =>
-        updated(0)
+      updated(0)
     case UpdatePolicyOffset(offset, false) =>
-        updated(modelRW.value + offset)
+      updated(modelRW.value + offset)
     case UpdatePolicyOffset(offset, true) =>
       updated(offset)
-    }
+  }
 }

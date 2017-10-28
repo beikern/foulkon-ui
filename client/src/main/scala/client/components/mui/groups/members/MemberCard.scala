@@ -23,11 +23,11 @@ object MemberCard {
   }
 
   case class Props(
-                    id: String,
-                    organizationId: String,
-                    groupName: String,
-                    memberInfo: MemberAssociatedToGroupInfo,
-                    removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      id: String,
+      organizationId: String,
+      groupName: String,
+      memberInfo: MemberAssociatedToGroupInfo,
+      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   )
 
   case class State(
@@ -88,11 +88,11 @@ object MemberCard {
     .build
 
   def apply(
-             id: String,
-             organizationId: String,
-             groupName: String,
-             memberInfo: MemberAssociatedToGroupInfo,
-             removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      id: String,
+      organizationId: String,
+      groupName: String,
+      memberInfo: MemberAssociatedToGroupInfo,
+      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   ) =
     component(
       Props(

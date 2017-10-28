@@ -62,7 +62,8 @@ object GroupPoliciesComponent {
                 MuiCardHeader(
                   title = <.span(<.b(s"Group ${p.id} policies")).render
                 )(),
-                MuiCardText()(<.div(s"Can't list group policies. Foulkon code: ${foulkonError.code} .Foulkon error:${foulkonError.message} . Sorry!"))
+                MuiCardText()(
+                  <.div(s"Can't list group policies. Foulkon code: ${foulkonError.code} .Foulkon error:${foulkonError.message} . Sorry!"))
               )
             )
           case Some(GroupMetadataWithPolicy(organizationId, name, Right(policyInfoList))) =>

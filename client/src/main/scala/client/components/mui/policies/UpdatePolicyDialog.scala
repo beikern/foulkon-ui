@@ -171,7 +171,7 @@ object UpdatePolicyDialog {
           nv <- s.nameValue
           pv <- s.pathValue
         } yield {
-            (nv, pv)
+          (nv, pv)
         }
         createPolicyData match {
           case Some((name, path)) =>
@@ -225,13 +225,10 @@ object UpdatePolicyDialog {
     .build
 
   def apply(
-    policyDetail: PolicyDetail,
-    dialogOpened: Boolean,
-    changeDialogState: Boolean => Callback,
-    updatePolicyCallback: (UpdatePolicyRequest) => Callback
-  ) = component(Props(policyDetail,
-    dialogOpened,
-    changeDialogState,
-    updatePolicyCallback))
+      policyDetail: PolicyDetail,
+      dialogOpened: Boolean,
+      changeDialogState: Boolean => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
+  ) = component(Props(policyDetail, dialogOpened, changeDialogState, updatePolicyCallback))
 
 }

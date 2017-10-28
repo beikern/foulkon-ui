@@ -32,4 +32,3 @@ case class ReactInfinite(handleScroll: js.UndefOr[HTMLElement => Callback] = js.
 trait ReactInfiniteM extends js.Object {
   def getScrollTop(): Double = js.native
 }
-

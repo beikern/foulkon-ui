@@ -3,7 +3,17 @@ package client.components.mui.policies
 import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardActions, MuiCardHeader, MuiCardText, MuiDivider, MuiFlatButton, MuiGridList, MuiIconButton}
+import chandu0101.scalajs.react.components.materialui.{
+  Mui,
+  MuiCard,
+  MuiCardActions,
+  MuiCardHeader,
+  MuiCardText,
+  MuiDivider,
+  MuiFlatButton,
+  MuiGridList,
+  MuiIconButton
+}
 import client.routes.AppRouter.{Location, PolicyStatementsLocation}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
@@ -70,8 +80,7 @@ object PolicyCard {
             changeUpdatePolicyStateCallback,
             p.updatePolicyCallback
           )
-        )
-        ,
+        ),
         MuiCard(expanded = js.defined(s.statementExpanded))(
           <.div(
             MuiGridList(cellHeight = js.defined(50))(
@@ -122,10 +131,10 @@ object PolicyCard {
     .build
 
   def apply(
-    router: RouterCtl[Location],
-    policyDetail: PolicyDetail,
-    deletePolicyCallback: (DeletePolicyRequest) => Callback,
-    updatePolicyCallback: (UpdatePolicyRequest) => Callback
+      router: RouterCtl[Location],
+      policyDetail: PolicyDetail,
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
   ) =
     component(
       Props(

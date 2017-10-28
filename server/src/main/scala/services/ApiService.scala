@@ -315,7 +315,7 @@ class ApiService(
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
-            println("WHAAAT "+responseEither)
+            println("WHAAAT " + responseEither)
             responseEither.right.get.policies
           }
         )
@@ -365,9 +365,8 @@ class ApiService(
 
     val apiResult = listAllPoliciesResponse.flatMap { policiesListAllEither =>
       policiesListAllEither
-        .map {
-          policiesListAllResponse =>
-            policiesListAllResponse.policies.map { policyInfo =>
+        .map { policiesListAllResponse =>
+          policiesListAllResponse.policies.map { policyInfo =>
             val policyRequest = GetPolicyRequest(
               GetPolicyRequestPathParams(
                 policyInfo.org,
@@ -398,8 +397,7 @@ class ApiService(
         .map(_.sequenceU)
     }
 
-    apiResult.flatMap {
-      eitherResult =>
+    apiResult.flatMap { eitherResult =>
       val mappedResult = eitherResult.map { policyDetailResponseList =>
         policyDetailResponseList.map { policyDetailResponse =>
           PolicyDetail(
@@ -419,23 +417,23 @@ class ApiService(
   }
 
   val mockPolicies: List[PolicyDetail] =
-      (0 to 35).toList.map{
-        n =>
-          val ns = n.toString
-          PolicyDetail(
-            ns,
-            ns,
-            ns,
-            ns,
-            ns,
-            ns,
-            ns,
-            List()
-          )
-      }
-  def readPoliciesMock(request: ReadPoliciesRequest) : Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
+    (0 to 35).toList.map { n =>
+      val ns = n.toString
+      PolicyDetail(
+        ns,
+        ns,
+        ns,
+        ns,
+        ns,
+        ns,
+        ns,
+        List()
+      )
+    }
+  def readPoliciesMock(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
     println(s"readPolicies mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
-    val x: Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = Future(Right(mockPolicies.size -> mockPolicies.slice(request.offset, request.offset + request.limit)))
+    val x: Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = Future(
+      Right(mockPolicies.size -> mockPolicies.slice(request.offset, request.offset + request.limit)))
     x
   }
   override def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]] = {

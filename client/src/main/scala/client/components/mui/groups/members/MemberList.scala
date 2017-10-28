@@ -8,11 +8,11 @@ import shared.responses.groups.members.MemberAssociatedToGroupInfo
 object MemberList {
 
   case class Props(
-                    id: String,
-                    organizationId: String,
-                    groupName: String,
-                    members: List[MemberAssociatedToGroupInfo],
-                    removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      id: String,
+      organizationId: String,
+      groupName: String,
+      members: List[MemberAssociatedToGroupInfo],
+      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   )
 
   private val component = ScalaComponent
@@ -36,11 +36,11 @@ object MemberList {
     .build
 
   def apply(
-             id: String,
-             organizationId: String,
-             groupName: String,
-             members: List[MemberAssociatedToGroupInfo],
-             removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      id: String,
+      organizationId: String,
+      groupName: String,
+      members: List[MemberAssociatedToGroupInfo],
+      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
   ) = component(
     Props(
       id,
