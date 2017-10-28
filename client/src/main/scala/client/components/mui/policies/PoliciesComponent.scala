@@ -3,14 +3,13 @@ package client.components.mui.policies
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
 import client.appstate._
-import client.appstate.policies.{CreatePolicy, DeletePolicy, FetchPoliciesToConcat, UpdatePolicy}
+import client.appstate.policies._
 import client.routes.AppRouter.Location
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
-import shared.requests.policies.ReadPoliciesRequest
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -43,7 +42,7 @@ object PoliciesComponent {
     }
 
     def mounted(props: Props) =
-      Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(FetchPoliciesToConcat(ReadPoliciesRequest())))
+      Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(FetchPoliciesToReset))
 
     def render(p: Props, s: State) = {
       <.div(

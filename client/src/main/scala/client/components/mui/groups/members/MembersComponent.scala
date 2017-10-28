@@ -44,7 +44,6 @@ object MembersComponent {
       <.div(
         memberInfo match {
           case Some(GroupMetadataWithMember(organizationId, name, Right(List()))) =>
-            println(s"SOME CASE, LIST EMPTY")
             <.div(
               CreateMemberGroupDialog(
                 p.id,
@@ -65,7 +64,6 @@ object MembersComponent {
               )
             )
           case Some(GroupMetadataWithMember(_, _, Left(foulkonError))) =>
-            println(s"SOME CASE, foulkon error")
             <.div(
               ^.className := "card-padded",
               MuiCard()(
@@ -76,7 +74,6 @@ object MembersComponent {
               )
             )
           case Some(GroupMetadataWithMember(organizationId, name, Right(memberInfoList))) =>
-            println(s"SOME CASE, list not empty")
             <.div(
               CreateMemberGroupDialog(
                 p.id,
@@ -101,7 +98,6 @@ object MembersComponent {
               )
             )
           case None =>
-            println("NONE CASE")
             <.div(
               ^.className := "card-padded",
               MuiCard()(

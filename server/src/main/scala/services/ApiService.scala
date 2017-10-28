@@ -1,5 +1,7 @@
 package services
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import cats.implicits._
 import clients.FoulkonClient
@@ -19,8 +21,11 @@ import shared.requests.policies._
 import shared.responses.policies._
 import shared.responses.FoulkonErrorFromJson
 import shared.utils.FoulkonErrorUtils
+
 import scala.concurrent.Future
 import shared.Total
+
+import scala.util.{Failure, Success}
 
 class ApiService(
     implicit val actorSystem: ActorSystem
@@ -30,7 +35,6 @@ class ApiService(
 
   // USERS
   override def readUsers(): Future[Either[FoulkonError, List[UserDetail]]] = {
-    println("retrieving users")
 
     val listAllUserResponse = listAllUsersRequest.send().map { response =>
       response.body
@@ -315,7 +319,6 @@ class ApiService(
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
-            println("WHAAAT " + responseEither)
             responseEither.right.get.policies
           }
         )
@@ -347,8 +350,7 @@ class ApiService(
         )
     }
   }
-  def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
-    println(s"readPolicies request. Offset: ${request.offset}, Limit: ${request.limit}")
+  override def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
     val listAllPoliciesResponse = listAllPoliciesRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -420,7 +422,7 @@ class ApiService(
     (0 to 35).toList.map { n =>
       val ns = n.toString
       PolicyDetail(
-        ns,
+        UUID.randomUUID().toString,
         ns,
         ns,
         ns,
