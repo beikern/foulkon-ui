@@ -1,10 +1,11 @@
 package client.components.mui.policies
 
-import chandu0101.scalajs.react.components.ReactInfinite
+import client.components.others.ReactInfinite
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import shared.{Offset, Total}
 import shared.entities.PolicyDetail
-import shared.requests.policies.{DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}
+import shared.requests.policies._
 
 import scala.scalajs.js
 
@@ -12,24 +13,29 @@ object PolicyList {
 
   case class Props(
       policies: List[PolicyDetail],
+      offset: Offset,
+      total: Total,
       deletePolicyCallback: (DeletePolicyRequest) => Callback,
       updatePolicyCallback: (UpdatePolicyRequest) => Callback,
       retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
   )
-  case class State(
-    offset: Int = 1
-  )
+  case class State()
 
   class Backend($ : BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
+      println("render executed")
       val handleInfiniteLoad: Callback = {
-        val request = ReadPoliciesRequest(s.offset)
-        p.retrieveNextPoliciesCallback(request) >> $.modState(s => s.copy(offset = s.offset + 1))
+        println("called handleInfiniteLoad")
+
+        val request = ReadPoliciesRequest(p.offset)
+        Callback.unless(p.offset >= p.total)(p.retrieveNextPoliciesCallback(request))
       }
 
-      <.div(
-        ReactInfinite(elementHeight = 280,
-          containerHeight = 300, onInfiniteLoad = js.defined(handleInfiniteLoad), infiniteLoadBeginBottomOffset = js.defined(10))(
+      <.div(^.style:= scala.scalajs.js.Dynamic.literal("overflowAnchor" -> "none"), //https://github.com/utatti/perfect-scrollbar/issues/612 react-infinite has the same problem using Chrome.
+        ReactInfinite(elementHeight = 300,
+          onInfiniteLoad = js.defined(handleInfiniteLoad),
+          infiniteLoadBeginEdgeOffset = js.defined(5),
+          timeScrollStateLastsForAfterUserScrolls = js.defined(1000))(
           p.policies.map { policyDetail =>
             <.div(^.className := "card-nested-padded",
               PolicyCard(
@@ -51,12 +57,16 @@ object PolicyList {
 
   def apply(
     policies: List[PolicyDetail],
+    offset: Offset,
+    total: Total,
     deletePolicyCallback: (DeletePolicyRequest) => Callback,
     updatePolicyCallback: (UpdatePolicyRequest) => Callback,
     retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
   ) = component(
     Props(
       policies,
+      offset,
+      total,
       deletePolicyCallback,
       updatePolicyCallback,
       retrieveNextPoliciesCallback

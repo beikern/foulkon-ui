@@ -3,8 +3,8 @@ package client.components.mui.policies
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
 import client.appstate._
+import client.appstate.policies.{CreatePolicy, DeletePolicy, RefreshPolicies, UpdatePolicy}
 import client.routes.AppRouter.Location
-import diode.data.Pot
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react._
@@ -22,11 +22,15 @@ object PoliciesComponent {
   object Style extends StyleSheet.Inline {
     import dsl._
     val createPolicyButton = style(
-      float.right
+      margin(0.px),
+      top(auto),
+      bottom(40.px),
+      right(10.%%),
+      position.fixed
     )
   }
 
-  case class Props(proxy: ModelProxy[Pot[Policies]], router: RouterCtl[Location])
+  case class Props(proxy: ModelProxy[PolicyModule], router: RouterCtl[Location])
   case class State(createPolicyDialogOpened: Boolean = false)
 
   class Backend($ : BackendScope[Props, State]) {
@@ -39,13 +43,13 @@ object PoliciesComponent {
     }
 
     def mounted(props: Props) =
-      Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshPolicies(ReadPoliciesRequest(0,1))))
+      Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(RefreshPolicies(ReadPoliciesRequest())))
 
     def render(p: Props, s: State) = {
       <.div(
-        p.proxy().renderFailed(ex => "Error loading"),
-        p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy()
+        p.proxy().policies.renderFailed(ex => "Error loading"),
+        p.proxy().policies.renderPending(_ > 500, _ => "Loading..."),
+        p.proxy().policies
           .renderEmpty(
             <.div(
               ^.className := "card-padded",
@@ -62,11 +66,11 @@ object PoliciesComponent {
               )
             )
           ),
-        p.proxy()
+        p.proxy().policies
           .render(
             policiesFromProxy => {
               policiesFromProxy.policies match {
-                case Right(List()) =>
+                case Right((total, List())) =>
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -81,7 +85,7 @@ object PoliciesComponent {
                       MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
                     )
                   )
-                case Right(policyDetails) =>
+                case Right((total, policyDetails)) =>
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -95,6 +99,8 @@ object PoliciesComponent {
                       )(),
                       PolicyList(
                         policyDetails,
+                        p.proxy().offset,
+                        total,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),
                         (request) => p.proxy.dispatchCB(UpdatePolicy(request)),
                         (request) => p.proxy.dispatchCB(RefreshPolicies(request))
@@ -122,7 +128,10 @@ object PoliciesComponent {
           ),
         <.div(
           Style.createPolicyButton,
-          MuiFloatingActionButton(onTouchTap = js.defined(showCreatePolicyDialogCallback _))(
+          MuiFloatingActionButton(
+            onTouchTap = js.defined(showCreatePolicyDialogCallback _),
+            mini = true
+          )(
             Mui.SvgIcons.ContentAdd.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
           )
         )
@@ -137,6 +146,6 @@ object PoliciesComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(proxy: ModelProxy[Pot[Policies]], router: RouterCtl[Location]) = component(Props(proxy, router))
+  def apply(proxy: ModelProxy[PolicyModule], router: RouterCtl[Location]) = component(Props(proxy, router))
 
 }

@@ -44,7 +44,7 @@ object AppRouter {
 
       val groupPolicyWrapper         = SPACircuit.connect(_.groupModule.policies)
 
-      val policiesWrapper       = SPACircuit.connect(_.policyModule.policies)
+      val policiesWrapper       = SPACircuit.connect(_.policyModule)
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
       val usersRoute: Rule =

@@ -29,11 +29,6 @@ lazy val client: Project = (project in file("client"))
     npmDependencies in Compile := Seq(
       "react"                             -> Settings.versions.reactVersion,
       "react-dom"                         -> Settings.versions.reactVersion,
-      "react-addons-create-fragment"      -> Settings.versions.reactVersion,
-      "react-addons-css-transition-group" -> Settings.versions.reactVersion,
-      "react-addons-pure-render-mixin"    -> Settings.versions.reactVersion,
-      "react-addons-transition-group"     -> Settings.versions.reactVersion,
-      "react-addons-update"               -> Settings.versions.reactVersion,
       "react-infinite"                    -> Settings.versions.reactInfinite,
       "material-ui"                       -> Settings.versions.MuiVersion,
       "react-tap-event-plugin"            -> "2.0.1",

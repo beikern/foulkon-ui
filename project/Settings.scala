@@ -26,7 +26,7 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.12.2"
+    val scala = "2.12.4"
     val scalaDom = "0.9.2"
     val scalajsReact = "1.0.1"
     val scalajsReactComponents = "0.8.0"
@@ -45,9 +45,9 @@ object Settings {
     val Sttp = "0.0.14"
     val circe = "0.8.0"
     // js dependencies
-    val MuiVersion   = "0.17.0"
-    val reactVersion = "15.4.2"
-    val reactInfinite = "0.10.0"
+    val MuiVersion   = "0.19.4"
+    val reactVersion = "15.5.0"
+    val reactInfinite = "0.12.1"
   }
 
   /**
