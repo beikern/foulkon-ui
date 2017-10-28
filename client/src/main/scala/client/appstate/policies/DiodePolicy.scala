@@ -38,7 +38,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .call
             .map(
               policiesDetailEither =>
-                ConcatNewPolicies(
+                ResetPolicies(
                   policiesDetailEither
               )
             )
@@ -47,23 +47,10 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
     case ResetPolicies(policies) =>
       policies match {
         case Right((total, addNewPoliciesList)) =>
-          if (modelRW.value.isEmpty) {
-            updated(
-              Ready(Policies(policies)),
-              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = true)))
-            )
-          } else {
-            val concatResult = modelRW.value.map(
-              _.policies.map {
-                case (_, statePolicyList) =>
-                  total -> (statePolicyList ::: addNewPoliciesList)
-              }
-            )
-            updated(
-              concatResult.map(Policies),
-              Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = true)))
-            )
-          }
+          updated(
+            Ready(Policies(policies)),
+            Effect(Future(UpdatePolicyOffset(addNewPoliciesList.size, offsetMustBeReseted = true)))
+          )
         case error @ Left(foulkonError) =>
           updated(
             Ready(Policies(error)),

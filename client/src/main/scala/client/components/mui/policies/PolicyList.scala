@@ -20,18 +20,17 @@ object PolicyList {
       total: Total,
       deletePolicyCallback: (DeletePolicyRequest) => Callback,
       updatePolicyCallback: (UpdatePolicyRequest) => Callback,
-      retrieveNextPoliciesCallback: (ReadPoliciesRequest) => Callback
+      fetchNextPoliciesCallback: (ReadPoliciesRequest) => Callback
   )
   case class State()
 
   class Backend($ : BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
-      println("render executed")
       val handleInfiniteLoad: Callback = {
-        println("called handleInfiniteLoad")
-
-        val request = ReadPoliciesRequest(p.offset)
-        Callback.unless(p.offset >= p.total)(p.retrieveNextPoliciesCallback(request))
+        Callback.when(p.offset < p.total) {
+          val request = ReadPoliciesRequest(p.offset)
+          p.fetchNextPoliciesCallback(request)
+        }
       }
 
       <.div(

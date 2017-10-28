@@ -187,7 +187,6 @@ class GroupHandler[M](modelRW: ModelRW[M, Pot[Groups]]) extends ActionHandler(mo
         )
       )
     case UpdateAllGroups(groups) =>
-      println("updateAllGroups executed")
       updated(
         Ready(
           Groups(groups)

@@ -48,8 +48,6 @@ class Application @Inject()(
   val apiService = new ApiService()
 
   def autowireApi(path: String): Action[RawBuffer] = Action.async(parse.raw) { implicit request =>
-    println(s"Request path: $path")
-
     // get the request body as ByteString
     val b = request.body.asBytes(parse.UNLIMITED).get
 
