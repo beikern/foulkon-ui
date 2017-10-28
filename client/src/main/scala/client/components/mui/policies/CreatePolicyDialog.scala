@@ -196,8 +196,6 @@ object CreatePolicyDialog {
             onClick = js.defined(addStatement)
           )(): VdomNode
 
-        println("statements" + s.statements + "validation" + s.inputValidated)
-
         s.statements.map {
           case (k, _) =>
             StatementCard(k, removeStatement, handleStatementResult): VdomNode

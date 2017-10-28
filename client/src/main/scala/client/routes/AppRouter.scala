@@ -7,6 +7,7 @@ import client.appstate.SPACircuit
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
 import client.components.mui.groups.policies.GroupPoliciesComponent
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
+import client.components.mui.policies.statements.PolicyStatementsComponent
 import client.components.mui.policies.{PoliciesComponent, PolicyFeedbackSnackbar}
 import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
 import client.components.mui.{CountAndFilterToolBar, NavToolBar}
@@ -27,7 +28,7 @@ object AppRouter {
   case object AuthoritationLocation         extends Location
   case class GroupMembersLocation(id: UUID) extends Location
   case class GroupPoliciesLocation(id: UUID) extends Location
-
+  case class PolicyStatementsLocation(id: UUID) extends Location
   // Configure the router
   val routerConfig: RouterConfig[Location] = RouterConfigDsl[Location]
     .buildConfig { dsl =>
@@ -44,9 +45,12 @@ object AppRouter {
 
       val groupPolicyWrapper         = SPACircuit.connect(_.groupModule.policies)
 
-      val policiesWrapper       = SPACircuit.connect(_.policyModule.policies)
+      val policyModuleWrapper       = SPACircuit.connect(_.policyModule)
+      val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
+
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
+      // USERS
       val usersRoute: Rule =
         staticRoute("#users", UsersLocation) ~>
           renderR(
@@ -58,6 +62,7 @@ object AppRouter {
             )
           )
 
+      // GROUPS
       val groupsRoute: Rule =
         staticRoute("#groups", GroupsLocation) ~>
           renderR(
@@ -69,17 +74,6 @@ object AppRouter {
             )
           )
 
-      val policiesRoute: Rule =
-        staticRoute("#policies", PoliciesLocation) ~>
-          renderR(
-            ctl =>
-              <.div(
-                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
-                MuiMuiThemeProvider()(policiesWrapper(PoliciesComponent(_, ctl))),
-                MuiMuiThemeProvider()(policyFeedbackWrapper(PolicyFeedbackSnackbar(_)))
-            )
-          )
-
       val groupMembersRoute: Rule = dynamicRouteCT("#groups" / uuid.caseClass[GroupMembersLocation] / "members") ~>
         dynRenderR(
           (p: GroupMembersLocation, ctl) =>
@@ -87,7 +81,7 @@ object AppRouter {
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Group members", 1))),
               MuiMuiThemeProvider()(groupMemberWrapper(groupMetadataWithMember => MembersComponent(p.id.toString, groupMetadataWithMember, ctl))),
               MuiMuiThemeProvider()(groupMemberFeedbackWrapper(GroupMemberFeedbackSnackbar(_)))
-          )
+            )
         )
 
       val groupPoliciesRoute: Rule = dynamicRouteCT("#groups" / uuid.caseClass[GroupPoliciesLocation] / "policies") ~>
@@ -99,12 +93,34 @@ object AppRouter {
             )
         )
 
+      // POLICIES
+      val policiesRoute: Rule =
+        staticRoute("#policies", PoliciesLocation) ~>
+          renderR(
+            ctl =>
+              <.div(
+                MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policies", 1))),
+                MuiMuiThemeProvider()(policyModuleWrapper(PoliciesComponent(_, ctl))),
+                MuiMuiThemeProvider()(policyFeedbackWrapper(PolicyFeedbackSnackbar(_)))
+            )
+          )
+
+      val policyStatementsRoute: Rule = dynamicRouteCT("#policies" / uuid.caseClass[PolicyStatementsLocation] / "statements") ~>
+        dynRenderR(
+          (p: PolicyStatementsLocation, ctl) =>
+            <.div(
+              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policy statements", 1))),
+              MuiMuiThemeProvider()(policiesWrapper(policyProxy => PolicyStatementsComponent(p.id.toString, policyProxy.zoom(_.map(_.policies)), ctl)))
+            )
+        )
+
       (emptyRule
         | usersRoute
         | groupsRoute
         | groupMembersRoute
         | groupPoliciesRoute
-        | policiesRoute).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
+        | policiesRoute
+        | policyStatementsRoute).notFound(redirectToPage(UsersLocation)(Redirect.Replace))
     }
     .renderWith(layout)
 

@@ -8,21 +8,20 @@ import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
 import shared.FoulkonError
 import client.services.AjaxClient
 import shared.Api
-import cats.syntax.either._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import boopickle.Default._
+import client.appstate.policies.{PolicyFeedbackHandler, PolicyHandler, PolicyOffsetHandler}
 import diode.ActionResult.ModelUpdate
 import diode.react.ReactConnector
 import shared.requests.groups._
 import shared.requests.groups.members._
 import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
-import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, UpdatePolicyRequest}
 import shared.responses.groups.GroupDeleteResponse
 import shared.responses.groups.members.MemberAssociatedToGroupInfo
 import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
-import shared.responses.policies.DeletePolicyResponse
 import shared.responses.users.UserDeleteResponse
+import shared.{Offset, Total}
 
 import scala.concurrent.Future
 
@@ -74,14 +73,6 @@ case class RemoveGroupMember(id: String, organizationId: String, name: String, u
 case class UpdateGroupMemberFeedbackReporting(id: String, organizationId: String, name: String, feedback: Either[FoulkonError, MessageFeedback])
     extends Action
 case object RemoveGroupMemberFeedbackReporting extends Action
-
-// Policies
-case object RefreshPolicies                                                               extends Action
-case class UpdateAllPolicies(policies: Either[FoulkonError, List[PolicyDetail]])          extends Action
-case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
-case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
-case class UpdatePolicy(request: UpdatePolicyRequest) extends Action
 
 // Handlers
 class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(modelRW) {
@@ -196,6 +187,7 @@ class GroupHandler[M](modelRW: ModelRW[M, Pot[Groups]]) extends ActionHandler(mo
         )
       )
     case UpdateAllGroups(groups) =>
+      println("updateAllGroups executed")
       updated(
         Ready(
           Groups(groups)
@@ -342,74 +334,6 @@ class GroupPolicyHandler[M](modelRW: ModelRW[M, Map[String, GroupMetadataWithPol
   }
 }
 
-class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
-  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case RefreshPolicies =>
-      effectOnly(
-        Effect(
-          AjaxClient[Api]
-            .readPolicies()
-            .call
-            .map(
-              policiesDetailEither =>
-                UpdateAllPolicies(
-                  policiesDetailEither
-              )
-            )
-        )
-      )
-    case UpdateAllPolicies(policies) =>
-      updated(
-        Ready(
-          Policies(policies)
-        )
-      )
-    case CreatePolicy(request) =>
-      effectOnly(
-        Effect(
-          AjaxClient[Api]
-            .createPolicy(request)
-            .call
-            .map {
-              case Left(foulkonError)  => UpdatePolicyFeedbackReporting(Left(foulkonError))
-              case Right(policyDetail) => UpdatePolicyFeedbackReporting(Right(s"policy ${policyDetail.name} created successfully!"))
-            }
-        )
-      )
-    case DeletePolicy(request) =>
-      effectOnly(
-        Effect(
-          AjaxClient[Api]
-            .deletePolicy(request)
-            .call
-            .map {
-              case Left(foulkonError)                    => UpdatePolicyFeedbackReporting(Left(foulkonError))
-              case Right(DeletePolicyResponse(org, nam)) => UpdatePolicyFeedbackReporting(Right(s"Policy $nam with org $org deleted successfully!"))
-            }
-        )
-      )
-    case UpdatePolicy(request) =>
-      effectOnly(
-        Effect(
-          AjaxClient[Api]
-            .updatePolicy(request)
-            .call
-            .map {
-              case Left(foulkonError)                          => UpdatePolicyFeedbackReporting(Left(foulkonError))
-              case Right(_) => UpdatePolicyFeedbackReporting(Right(s"policy updated successfully!"))
-            }
-        )
-      )
-  }
-}
-
-class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReporting]]) extends ActionHandler(modelRW) {
-  override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case UpdatePolicyFeedbackReporting(feedback) =>
-      updated(Some(PolicyFeedbackReporting(feedback)), Effect(Future(RefreshPolicies)))
-  }
-}
-
 // Users
 case class UserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
 case class Users(users: Either[FoulkonError, Map[String, UserWithGroup]])
@@ -430,9 +354,10 @@ case class GroupModule(
 
 // Policies
 case class PolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
-case class Policies(policies: Either[FoulkonError, List[PolicyDetail]])
+case class Policies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])
 case class PolicyModule(
     policies: Pot[Policies],
+    offset: Offset,
     policyFeedbackReporting: Option[PolicyFeedbackReporting]
 )
 
@@ -447,7 +372,7 @@ case class RootModel(
 // Application circuit
 object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def initialModel: RootModel =
-    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, None))
+    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, 0, None))
 
   override protected def actionHandler: SPACircuit.HandlerFunction = composeHandlers(
     new UserHandler(zoomRW(_.userModule.users)((m, v) => m.copy(userModule = m.userModule.copy(users = v)))),
@@ -460,6 +385,7 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
       zoomRW(_.groupModule.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupMemberFeedbackReporting = v)))),
     new GroupPolicyHandler(zoomRW(_.groupModule.policies)((m, v) => m.copy(groupModule = m.groupModule.copy(policies = v)))),
     new PolicyHandler(zoomRW(_.policyModule.policies)((m, v) => m.copy(policyModule = m.policyModule.copy(policies = v)))),
+    new PolicyOffsetHandler(zoomRW(_.policyModule.offset)((m, v) => m.copy(policyModule = m.policyModule.copy(offset = v)))),
     new PolicyFeedbackHandler(
       zoomRW(_.policyModule.policyFeedbackReporting)((m, v) => m.copy(policyModule = m.policyModule.copy(policyFeedbackReporting = v))))
   )
