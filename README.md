@@ -4,7 +4,7 @@ Welcome to Foulkon UI!
 
 This is an UI for the authorization server written in Go [Foulkon](https://github.com/Tecsisa/foulkon)
 
-NPM and Yarn are mandatory to resolve Javascript dependencies.
+NPM isgit  mandatory to resolve Javascript dependencies.
 
 It's in a WIP state, stay tuned!
 
