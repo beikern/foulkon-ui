@@ -4,6 +4,7 @@ import java.util.UUID
 
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
+import client.appstate.policies.PolicyComponentZoomedModel
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
 import client.components.mui.groups.policies.GroupPoliciesComponent
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
@@ -45,8 +46,16 @@ object AppRouter {
 
       val groupPolicyWrapper = SPACircuit.connect(_.groupModule.policies)
 
-      val policyModuleWrapper = SPACircuit.connect(_.policyModule)
-      val policiesWrapper     = SPACircuit.connect(_.policyModule.policies)
+      val policyModuleWrapper = SPACircuit.connect(
+        rootModel =>
+          PolicyComponentZoomedModel(
+            rootModel.policyModule.policies,
+            rootModel.policyModule.total,
+            rootModel.policyModule.offset
+        )
+      )
+
+      val policiesWrapper = SPACircuit.connect(_.policyModule.policies)
 
       val policyFeedbackWrapper = SPACircuit.connect(_.policyModule.policyFeedbackReporting)
 
@@ -111,8 +120,7 @@ object AppRouter {
           (p: PolicyStatementsLocation, ctl) =>
             <.div(
               MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Policy statements", 1))),
-              MuiMuiThemeProvider()(
-                policiesWrapper(policyProxy => PolicyStatementsComponent(p.id.toString, policyProxy.zoom(_.map(_.policies)), ctl)))
+              MuiMuiThemeProvider()(policiesWrapper(policyProxy => PolicyStatementsComponent(p.id.toString, policyProxy, ctl)))
           )
         )
 

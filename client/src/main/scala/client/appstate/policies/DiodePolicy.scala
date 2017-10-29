@@ -25,8 +25,8 @@ case class CreatePolicy(request: CreatePolicyRequest)                           
 case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
 case class UpdatePolicy(request: UpdatePolicyRequest)                                     extends Action
 case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case class IncrementPolicyOffset(updatedOffset: Offset)                                   extends Action
-case class ResetPolicyOffset(newOffset: Offset)                                           extends Action
+case class UpdateTotalIncrementPolicyOffset(total: Total, updatedOffset: Offset)          extends Action
+case class ResetTotalResetPolicyOffset(total: Total, Offset: Offset)                      extends Action
 
 // Policies Handlers
 class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
@@ -47,16 +47,16 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
       )
     case ResetPolicies(policies) =>
       policies match {
-        case Right((_, fetchedPoliciesToReset)) =>
+        case rightResult @ Right((total, fetchedPoliciesToReset)) =>
           updated(
-            Ready(Policies(policies)),
-            Effect(Future(ResetPolicyOffset(fetchedPoliciesToReset.size)))
+            Ready(Policies(rightResult.map(_._2))),
+            Effect(Future(ResetTotalResetPolicyOffset(total, fetchedPoliciesToReset.size)))
           )
-        case error @ Left(_) =>
+        case leftResult @ Left(_) =>
           updated(
-            Ready(Policies(error)),
+            Ready(Policies(leftResult.map(_._2))),
             Effect(
-              Future(ResetPolicyOffset(0))
+              Future(ResetTotalResetPolicyOffset(0, 0))
             )
           )
       }
@@ -76,29 +76,28 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
       )
     case ConcatNewPolicies(policies) =>
       policies match {
-        case Right((total, fetchedPolicies)) =>
+        case rightResult @ Right((total, fetchedPolicies)) =>
           if (modelRW.value.isEmpty) {
             updated(
-              Ready(Policies(policies)),
-              Effect(Future(IncrementPolicyOffset(fetchedPolicies.size)))
+              Ready(Policies(rightResult.map(_._2))),
+              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
             )
           } else {
             val concatResult = modelRW.value.map(
-              _.policies.map {
-                case (_, statePolicies) =>
-                  total -> (statePolicies ::: fetchedPolicies)
+              _.policies.map { statePolicies =>
+                statePolicies ::: fetchedPolicies
               }
             )
             updated(
               concatResult.map(Policies),
-              Effect(Future(IncrementPolicyOffset(fetchedPolicies.size)))
+              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
             )
           }
-        case error @ Left(_) =>
+        case leftResult @ Left(_) =>
           updated(
-            Ready(Policies(error)),
+            Ready(Policies(leftResult.map(_._2))),
             Effect(
-              Future(ResetPolicyOffset(0))
+              Future(ResetTotalResetPolicyOffset(0, 0))
             )
           )
       }
@@ -149,11 +148,13 @@ class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReportin
   }
 }
 
-class PolicyOffsetHandler[M](modelRW: ModelRW[M, Offset]) extends ActionHandler(modelRW) {
+class PolicyOffsetHandler[M](modelRW: ModelRW[M, (Total, Offset)]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case IncrementPolicyOffset(offset) =>
-      updated(modelRW.value + offset)
-    case ResetPolicyOffset(offset) =>
-      updated(offset)
+    case UpdateTotalIncrementPolicyOffset(total, offset) =>
+      val (_, stateOffset) = modelRW.value
+      updated(total -> (stateOffset + offset))
+
+    case ResetTotalResetPolicyOffset(total, offset) =>
+      updated(total -> offset)
   }
 }
