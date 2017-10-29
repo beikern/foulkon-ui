@@ -2,7 +2,6 @@ package client.components.mui.policies
 
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
-import client.appstate._
 import client.appstate.policies._
 import client.routes.AppRouter.Location
 import diode.react.ReactPot._
@@ -29,7 +28,7 @@ object PoliciesComponent {
     )
   }
 
-  case class Props(proxy: ModelProxy[PolicyModule], router: RouterCtl[Location])
+  case class Props(proxy: ModelProxy[PolicyComponentZoomedModel], router: RouterCtl[Location])
   case class State(createPolicyDialogOpened: Boolean = false)
 
   class Backend($ : BackendScope[Props, State]) {
@@ -71,7 +70,7 @@ object PoliciesComponent {
           .render(
             policiesFromProxy => {
               policiesFromProxy.policies match {
-                case Right((total, List())) =>
+                case Right(List()) =>
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -86,7 +85,7 @@ object PoliciesComponent {
                       MuiCardText()(<.div("There's no policies defined. Sorry! If you want to add one click the + button."))
                     )
                   )
-                case Right((total, policyDetails)) =>
+                case Right(policyDetails) =>
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -102,7 +101,7 @@ object PoliciesComponent {
                         p.router,
                         policyDetails,
                         p.proxy().offset,
-                        total,
+                        p.proxy().total,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),
                         (request) => p.proxy.dispatchCB(UpdatePolicy(request)),
                         (request) => p.proxy.dispatchCB(FetchPoliciesToConcat(request))
@@ -148,6 +147,6 @@ object PoliciesComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(proxy: ModelProxy[PolicyModule], router: RouterCtl[Location]) = component(Props(proxy, router))
+  def apply(proxy: ModelProxy[PolicyComponentZoomedModel], router: RouterCtl[Location]) = component(Props(proxy, router))
 
 }

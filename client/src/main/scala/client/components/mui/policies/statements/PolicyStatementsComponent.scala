@@ -1,6 +1,7 @@
 package client.components.mui.policies.statements
 
 import chandu0101.scalajs.react.components.materialui.{MuiCard, MuiCardHeader, MuiCardText}
+import client.appstate.Policies
 import client.routes.AppRouter.Location
 import diode.data.Pot
 import diode.react.ReactPot._
@@ -8,13 +9,12 @@ import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
-import shared.entities.PolicyDetail
+import shared.FoulkonError
 import shared.responses.policies.Statement
-import shared.{FoulkonError, Total}
 
 object PolicyStatementsComponent {
 
-  case class Props(id: String, proxy: ModelProxy[Pot[Either[FoulkonError, (Total, List[PolicyDetail])]]], router: RouterCtl[Location])
+  case class Props(id: String, proxy: ModelProxy[Pot[Policies]], router: RouterCtl[Location])
   case class State()
 
   class Backend($ : BackendScope[Props, State]) {
@@ -24,10 +24,9 @@ object PolicyStatementsComponent {
 
     def render(p: Props, s: State) = {
       val statements: Pot[Either[FoulkonError, Option[List[Statement]]]] =
-        p.proxy.value.map { policyListEither =>
-          policyListEither.map {
-            case (_, policyList) =>
-              policyList.find(_.id == p.id).map(_.statements)
+        p.proxy.value.map { policiesWrapper =>
+          policiesWrapper.policies.map { policyList =>
+            policyList.find(_.id == p.id).map(_.statements)
           }
         }
       <.div(
@@ -89,7 +88,7 @@ object PolicyStatementsComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(id: String, proxy: ModelProxy[Pot[Either[FoulkonError, (Total, List[PolicyDetail])]]], router: RouterCtl[Location]) =
+  def apply(id: String, proxy: ModelProxy[Pot[Policies]], router: RouterCtl[Location]) =
     component(Props(id, proxy, router))
 
 }

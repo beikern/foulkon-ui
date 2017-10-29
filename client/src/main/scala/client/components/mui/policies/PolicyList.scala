@@ -27,7 +27,7 @@ object PolicyList {
   class Backend($ : BackendScope[Props, State]) {
     def render(p: Props, s: State) = {
       val handleInfiniteLoad: Callback = {
-        Callback.when(p.offset < p.total) {
+        Callback.when (p.offset < p.total) {
           val request = ReadPoliciesRequest(p.offset)
           p.fetchNextPoliciesCallback(request)
         }

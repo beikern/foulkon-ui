@@ -353,10 +353,11 @@ case class GroupModule(
 
 // Policies
 case class PolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
-case class Policies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])
+case class Policies(policies: Either[FoulkonError, List[PolicyDetail]])
 case class PolicyModule(
     policies: Pot[Policies],
     offset: Offset,
+    total: Total,
     policyFeedbackReporting: Option[PolicyFeedbackReporting]
 )
 
@@ -371,7 +372,7 @@ case class RootModel(
 // Application circuit
 object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def initialModel: RootModel =
-    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, 0, None))
+    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, 0, 0, None))
 
   override protected def actionHandler: SPACircuit.HandlerFunction = composeHandlers(
     new UserHandler(zoomRW(_.userModule.users)((m, v) => m.copy(userModule = m.userModule.copy(users = v)))),
@@ -384,7 +385,8 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
       zoomRW(_.groupModule.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupMemberFeedbackReporting = v)))),
     new GroupPolicyHandler(zoomRW(_.groupModule.policies)((m, v) => m.copy(groupModule = m.groupModule.copy(policies = v)))),
     new PolicyHandler(zoomRW(_.policyModule.policies)((m, v) => m.copy(policyModule = m.policyModule.copy(policies = v)))),
-    new PolicyOffsetHandler(zoomRW(_.policyModule.offset)((m, v) => m.copy(policyModule = m.policyModule.copy(offset = v)))),
+    new PolicyOffsetHandler(zoomRW(root => root.policyModule.total -> root.policyModule.offset)((m, v) =>
+      m.copy(policyModule = m.policyModule.copy(total = v._1, offset = v._2)))),
     new PolicyFeedbackHandler(
       zoomRW(_.policyModule.policyFeedbackReporting)((m, v) => m.copy(policyModule = m.policyModule.copy(policyFeedbackReporting = v))))
   )
