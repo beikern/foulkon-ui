@@ -1,9 +1,11 @@
 package client.components.mui.policies.statements
 
-import chandu0101.scalajs.react.components.materialui.{MuiCard, MuiCardHeader, MuiCardText}
+import chandu0101.scalajs.react.components.materialui.{MuiCard, MuiCardHeader, MuiCardText, MuiList, MuiListItem}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.responses.policies.Statement
+
+import scala.scalajs.js
 
 object PolicyStatementCard {
 
@@ -23,15 +25,13 @@ object PolicyStatementCard {
             title = <.span(<.b(s"Effect")).render
           )(
             MuiCardText()(
-              <.div(p.statementDetail.effect)
+              MuiList()(MuiListItem(disabled = js.defined(true), primaryText = p.statementDetail.effect: VdomNode)())
             )
           )
         )
 
       val actionsToRender = p.statementDetail.actions.map { action =>
-        MuiCardText()(
-          <.div(action)
-        ): VdomNode
+        MuiListItem(disabled = js.defined(true), primaryText = action: VdomNode)(): VdomNode
       }
 
       val actionCard =
@@ -39,14 +39,14 @@ object PolicyStatementCard {
           MuiCardHeader(
             title = <.span(<.b(s"Actions")).render
           )(
-            actionsToRender: _*
+            MuiCardText()(
+              MuiList()(actionsToRender: _*)
+            )
           )
         )
 
       val resourcesToRender = p.statementDetail.resources.map { resource =>
-        MuiCardText()(
-          <.div(resource)
-        ): VdomNode
+        MuiListItem(disabled = js.defined(true), primaryText = resource: VdomNode)(): VdomNode
       }
 
       val resourceCard =
@@ -54,7 +54,9 @@ object PolicyStatementCard {
           MuiCardHeader(
             title = <.span(<.b(s"Resources")).render
           )(
-            resourcesToRender: _*
+            MuiCardText()(
+              MuiList()(resourcesToRender: _*)
+            )
           )
         )
 
