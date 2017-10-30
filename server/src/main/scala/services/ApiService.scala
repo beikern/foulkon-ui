@@ -350,7 +350,7 @@ class ApiService(
         )
     }
   }
-  override def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
+  def readPoliciessadfsdfasdf(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
     val listAllPoliciesResponse = listAllPoliciesRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -419,7 +419,7 @@ class ApiService(
   }
 
   val mockPolicies: List[PolicyDetail] =
-    (0 to 35).toList.map { n =>
+    (0 to 2500).toList.map { n =>
       val ns = n.toString
       PolicyDetail(
         UUID.randomUUID().toString,
@@ -429,10 +429,10 @@ class ApiService(
         ns,
         ns,
         ns,
-        List()
+        List(Statement(ns, List(), List()))
       )
     }
-  def readPoliciesMock(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
+  def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
     println(s"readPolicies mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
     val x: Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = Future(
       Right(mockPolicies.size -> mockPolicies.slice(request.offset, request.offset + request.limit)))

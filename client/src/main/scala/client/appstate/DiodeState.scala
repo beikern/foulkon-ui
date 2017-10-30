@@ -23,6 +23,7 @@ import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
 import shared.responses.users.UserDeleteResponse
 import shared.{Offset, Total}
 
+import scala.collection.mutable
 import scala.concurrent.Future
 
 case class UserWithGroup(
@@ -353,7 +354,7 @@ case class GroupModule(
 
 // Policies
 case class PolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
-case class Policies(policies: Either[FoulkonError, List[PolicyDetail]])
+case class Policies(policies: Either[FoulkonError, mutable.LinkedHashMap[String, PolicyDetail]])
 case class PolicyModule(
     policies: Pot[Policies],
     offset: Offset,

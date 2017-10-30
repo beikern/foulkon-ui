@@ -73,13 +73,11 @@ object PolicyCard {
           p.deletePolicyCallback,
           changeDeletePolicyStateCallback
         ),
-        <.div(
-          UpdatePolicyDialog(
-            p.policyDetail,
-            s.updateDialogOpened,
-            changeUpdatePolicyStateCallback,
-            p.updatePolicyCallback
-          )
+        UpdatePolicyDialog(
+          p.policyDetail,
+          s.updateDialogOpened,
+          changeUpdatePolicyStateCallback,
+          p.updatePolicyCallback
         ),
         MuiCard(expanded = js.defined(s.statementExpanded))(
           <.div(

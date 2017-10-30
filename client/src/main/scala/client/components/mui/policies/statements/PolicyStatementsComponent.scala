@@ -25,8 +25,8 @@ object PolicyStatementsComponent {
     def render(p: Props, s: State) = {
       val statements: Pot[Either[FoulkonError, Option[List[Statement]]]] =
         p.proxy.value.map { policiesWrapper =>
-          policiesWrapper.policies.map { policyList =>
-            policyList.find(_.id == p.id).map(_.statements)
+          policiesWrapper.policies.map { policyMap =>
+            policyMap.get(p.id).map(_.statements)
           }
         }
       <.div(

@@ -39,8 +39,8 @@ object PolicyList {
         ReactInfinite(
           elementHeight = 300,
           onInfiniteLoad = js.defined(handleInfiniteLoad),
-          infiniteLoadBeginEdgeOffset = js.defined(5),
-          timeScrollStateLastsForAfterUserScrolls = js.defined(1000)
+          infiniteLoadBeginEdgeOffset = js.defined(200),
+          timeScrollStateLastsForAfterUserScrolls = js.defined(150)
         )(
           p.policies.map { policyDetail =>
             <.div(^.className := "card-nested-padded",

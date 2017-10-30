@@ -70,7 +70,7 @@ object PoliciesComponent {
           .render(
             policiesFromProxy => {
               policiesFromProxy.policies match {
-                case Right(List()) =>
+                case Right(map) if map.isEmpty =>
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -99,7 +99,7 @@ object PoliciesComponent {
                       )(),
                       PolicyList(
                         p.router,
-                        policyDetails,
+                        policyDetails.toList.map(_._2),
                         p.proxy().offset,
                         p.proxy().total,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),

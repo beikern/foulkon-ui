@@ -14,6 +14,7 @@ import client.appstate.{Policies, PolicyFeedbackReporting}
 import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}
 import shared.responses.policies.DeletePolicyResponse
 
+import scala.collection.mutable
 import scala.concurrent.Future
 
 // Policies Actions
@@ -48,13 +49,31 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
     case ResetPolicies(policies) =>
       policies match {
         case rightResult @ Right((total, fetchedPoliciesToReset)) =>
+          val valueToUpdateState = rightResult.map {
+            case (_, policyDetailList) =>
+              val idPolicyTuple = policyDetailList.map {
+                policyDetail =>
+                  policyDetail.id -> policyDetail
+              }
+              mutable.LinkedHashMap(idPolicyTuple:_ *)
+          }
           updated(
-            Ready(Policies(rightResult.map(_._2))),
+            Ready(
+              Policies(valueToUpdateState)
+            ),
             Effect(Future(ResetTotalResetPolicyOffset(total, fetchedPoliciesToReset.size)))
           )
         case leftResult @ Left(_) =>
+          val valueToUpdateState = leftResult.map {
+            case (_, policyDetailList) =>
+              val idPolicyTuple = policyDetailList.map {
+                policyDetail =>
+                  policyDetail.id -> policyDetail
+              }
+              mutable.LinkedHashMap(idPolicyTuple:_ *)
+          }
           updated(
-            Ready(Policies(leftResult.map(_._2))),
+            Ready(Policies(valueToUpdateState)),
             Effect(
               Future(ResetTotalResetPolicyOffset(0, 0))
             )
@@ -77,15 +96,28 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
     case ConcatNewPolicies(policies) =>
       policies match {
         case rightResult @ Right((total, fetchedPolicies)) =>
+          val valueToUpdateState = rightResult.map {
+            case (_, policyDetailList) =>
+              val idPolicyTuple = policyDetailList.map {
+                policyDetail =>
+                  policyDetail.id -> policyDetail
+              }
+              mutable.LinkedHashMap(idPolicyTuple:_ *)
+          }
+
           if (modelRW.value.isEmpty) {
             updated(
-              Ready(Policies(rightResult.map(_._2))),
+              Ready(Policies(valueToUpdateState)),
               Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
             )
           } else {
             val concatResult = modelRW.value.map(
-              _.policies.map { statePolicies =>
-                statePolicies ::: fetchedPolicies
+              policyWrapper =>
+              for {
+                statePolicies <- policyWrapper.policies
+                value <- valueToUpdateState
+              } yield {
+                statePolicies ++= value
               }
             )
             updated(
@@ -94,8 +126,16 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             )
           }
         case leftResult @ Left(_) =>
+          val valueToUpdateState = leftResult.map {
+            case (_, policyDetailList) =>
+              val idPolicyTuple = policyDetailList.map {
+                policyDetail =>
+                  policyDetail.id -> policyDetail
+              }
+              mutable.LinkedHashMap(idPolicyTuple:_ *)
+          }
           updated(
-            Ready(Policies(leftResult.map(_._2))),
+            Ready(Policies(valueToUpdateState)),
             Effect(
               Future(ResetTotalResetPolicyOffset(0, 0))
             )
