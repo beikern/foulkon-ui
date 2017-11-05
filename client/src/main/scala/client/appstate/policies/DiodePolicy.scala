@@ -17,16 +17,14 @@ import shared.responses.policies.DeletePolicyResponse
 import scala.concurrent.Future
 
 // Policies Actions
-case object FetchPoliciesToReset                                                          extends Action
-case class ResetPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])     extends Action
-case class FetchPoliciesToConcat(request: ReadPoliciesRequest)                            extends Action
-case class ConcatNewPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])]) extends Action
+object FetchPoliciesToReset                                                               extends Action
+case class SetPolicies(offset: Offset, policies: Either[FoulkonError, (Total, List[PolicyDetail])])       extends Action
+case class FetchPolicies(request: ReadPoliciesRequest)                                    extends Action
 case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
 case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
 case class UpdatePolicy(request: UpdatePolicyRequest)                                     extends Action
 case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case class UpdateTotalIncrementPolicyOffset(total: Total, updatedOffset: Offset)          extends Action
-case class ResetTotalResetPolicyOffset(total: Total, Offset: Offset)                      extends Action
+case class SetPolicyOffset(total: Total, Offset: Offset)                                  extends Action
 
 // Policies Handlers
 class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
@@ -39,28 +37,29 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .call
             .map(
               policiesDetailEither =>
-                ResetPolicies(
+                SetPolicies(
+                  0,
                   policiesDetailEither
               )
             )
         )
       )
-    case ResetPolicies(policies) =>
+    case SetPolicies(offset, policies) =>
       policies match {
         case rightResult @ Right((total, fetchedPoliciesToReset)) =>
           updated(
             Ready(Policies(rightResult.map(_._2))),
-            Effect(Future(ResetTotalResetPolicyOffset(total, fetchedPoliciesToReset.size)))
+            Effect(Future(SetPolicyOffset(total, offset)))
           )
         case leftResult @ Left(_) =>
           updated(
             Ready(Policies(leftResult.map(_._2))),
             Effect(
-              Future(ResetTotalResetPolicyOffset(0, 0))
+              Future(SetPolicyOffset(0, 0))
             )
           )
       }
-    case FetchPoliciesToConcat(request) =>
+    case FetchPolicies(request) =>
       effectOnly(
         Effect(
           AjaxClient[Api]
@@ -68,39 +67,13 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .call
             .map(
               policiesDetailEither =>
-                ConcatNewPolicies(
+                SetPolicies(
+                  request.offset,
                   policiesDetailEither
               )
             )
         )
       )
-    case ConcatNewPolicies(policies) =>
-      policies match {
-        case rightResult @ Right((total, fetchedPolicies)) =>
-          if (modelRW.value.isEmpty) {
-            updated(
-              Ready(Policies(rightResult.map(_._2))),
-              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
-            )
-          } else {
-            val concatResult = modelRW.value.map(
-              _.policies.map { statePolicies =>
-                statePolicies ::: fetchedPolicies
-              }
-            )
-            updated(
-              concatResult.map(Policies),
-              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
-            )
-          }
-        case leftResult @ Left(_) =>
-          updated(
-            Ready(Policies(leftResult.map(_._2))),
-            Effect(
-              Future(ResetTotalResetPolicyOffset(0, 0))
-            )
-          )
-      }
 
     case CreatePolicy(request) =>
       effectOnly(
@@ -150,11 +123,7 @@ class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReportin
 
 class PolicyOffsetHandler[M](modelRW: ModelRW[M, (Total, Offset)]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case UpdateTotalIncrementPolicyOffset(total, offset) =>
-      val (_, stateOffset) = modelRW.value
-      updated(total -> (stateOffset + offset))
-
-    case ResetTotalResetPolicyOffset(total, offset) =>
+    case SetPolicyOffset(total, offset) =>
       updated(total -> offset)
   }
 }
