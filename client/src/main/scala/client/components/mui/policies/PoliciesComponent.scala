@@ -49,8 +49,8 @@ object PoliciesComponent {
 
     def render(p: Props, s: State) = {
       def handlePageClick(page: ReactPaginatePage) = {
-        val request = ReadPoliciesRequest(offset = page.selected * PageSize, PageSize)
-        p.proxy.dispatchCB(FetchPolicies(request))
+        val request = ReadPoliciesRequest(offset = page.selected * PageSize, limit = PageSize)
+        p.proxy.dispatchCB(FetchPolicies(request)) >> p.proxy.dispatchCB(UpdateSelectedPage(page.selected))
       }
 
       <.div(
@@ -95,7 +95,6 @@ object PoliciesComponent {
                     )
                   )
                 case Right(policyDetails) =>
-                  println(s"offset = ${p.proxy().offset}")
                   <.div(
                     ^.className := "card-padded",
                     CreatePolicyDialog(
@@ -104,7 +103,7 @@ object PoliciesComponent {
                       (request) => p.proxy.dispatchCB(CreatePolicy(request))
                     ),
                     ReactPaginate(
-                      pageCount = (p.proxy().total.toFloat / PageSize.toFloat).ceil.toInt ,
+                      pageCount = p.proxy().totalPages,
                       pageRangeDisplayed = 10,
                       marginPagesDisplayed = 2,
                       onPageChange = js.defined(handlePageClick _),
@@ -112,7 +111,7 @@ object PoliciesComponent {
                       activeClassName = js.defined("active"),
                       breakClassName = js.defined("break-me"),
                       breakLabel = js.defined(<.a("...")),
-                      forcePage = js.defined((p.proxy().offset.toFloat / PageSize.toFloat).ceil.toInt),
+                      forcePage = js.defined(p.proxy().selectedPage),
                       disableInitialCallback = js.defined(false)
 
                     )(),

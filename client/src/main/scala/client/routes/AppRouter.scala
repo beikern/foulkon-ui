@@ -50,8 +50,8 @@ object AppRouter {
         rootModel =>
           PolicyComponentZoomedModel(
             rootModel.policyModule.policies,
-            rootModel.policyModule.total,
-            rootModel.policyModule.offset
+            rootModel.policyModule.totalPages,
+            rootModel.policyModule.selectedPage
         )
       )
 

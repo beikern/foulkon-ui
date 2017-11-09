@@ -8,24 +8,21 @@ import clients.FoulkonClient
 import contexts.AkkaContext
 import io.circe.generic.auto._
 import io.circe.parser._
-import shared.{Api, FoulkonError}
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
-import shared.responses.users._
 import shared.requests.groups._
-import shared.responses.groups._
 import shared.requests.groups.members._
-import shared.responses.groups.members._
 import shared.requests.groups.policies._
-import shared.responses.groups.policies._
 import shared.requests.policies._
-import shared.responses.policies._
 import shared.responses.FoulkonErrorFromJson
+import shared.responses.groups._
+import shared.responses.groups.members._
+import shared.responses.groups.policies._
+import shared.responses.policies._
+import shared.responses.users._
 import shared.utils.FoulkonErrorUtils
+import shared.{Api, FoulkonError, TotalPolicies}
 
 import scala.concurrent.Future
-import shared.Total
-
-import scala.util.{Failure, Success}
 
 class ApiService(
     implicit val actorSystem: ActorSystem
@@ -350,7 +347,7 @@ class ApiService(
         )
     }
   }
-  override def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
+  def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]] = {
     val listAllPoliciesResponse = listAllPoliciesRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -432,9 +429,9 @@ class ApiService(
         List()
       )
     }
-  def readPoliciesMock(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = {
+  def readPoliciesMock(request: ReadPoliciesRequest): Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]] = {
     println(s"readPolicies mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
-    val x: Future[Either[FoulkonError, (Total, List[PolicyDetail])]] = Future(
+    val x: Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]] = Future(
       Right(mockPolicies.size -> mockPolicies.slice(request.offset, request.offset + request.limit)))
     x
   }

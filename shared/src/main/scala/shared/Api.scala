@@ -27,7 +27,7 @@ trait Api {
   def addMemberGroup(request: AddMemberGroupRequest): Future[Either[FoulkonError, AddMemberGroupResponse]]
   def removeMemberGroup(request: RemoveMemberGroupRequest): Future[Either[FoulkonError, RemoveMemberGroupResponse]]
   def readPoliciesAssociatedToGroup(request: PoliciesAssociatedToGroupRequest): Future[Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]]
-  def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (Total, List[PolicyDetail])]]
+  def readPolicies(request: ReadPoliciesRequest): Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]]
   def createPolicy(request: CreatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]
   def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]]
   def updatePolicy(request: UpdatePolicyRequest): Future[Either[FoulkonError, PolicyDetail]]

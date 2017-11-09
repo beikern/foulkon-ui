@@ -2,6 +2,6 @@ package client.appstate.policies
 
 import client.appstate.Policies
 import diode.data.Pot
-import shared.{Offset, Total}
+import shared.{SelectedPage, TotalPages}
 
-case class PolicyComponentZoomedModel(policies: Pot[Policies], total: Total, offset: Offset)
+case class PolicyComponentZoomedModel(policies: Pot[Policies], totalPages: TotalPages, selectedPage: SelectedPage)

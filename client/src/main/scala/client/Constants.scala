@@ -1,5 +1,5 @@
 package client
 
 object Constants {
-  val PageSize = 10
+  val PageSize = 20
 }

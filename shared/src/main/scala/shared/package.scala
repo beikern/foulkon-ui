@@ -1,4 +1,5 @@
 package object shared {
-  type Total = Int
-  type Offset = Int
+  type TotalPolicies = Int
+  type TotalPages = Int
+  type SelectedPage = Int
 }
