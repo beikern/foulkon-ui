@@ -10,7 +10,8 @@ var globalModules = {
   "material-ui/styles" : "mui.Styles",
   "material-ui/svg-icons/index" : "mui.SvgIcons",
   "react": "React",
-  "react-infinite": "Infinite"
+  "react-infinite": "Infinite",
+  "react-paginate": "ReactPaginate",
 };
 
 Object.keys(config.entry).forEach(function(key) {

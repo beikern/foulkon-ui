@@ -3,6 +3,7 @@ package client.components.mui.policies
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
 import client.appstate.policies._
+import client.components.others.ReactPaginate
 import client.routes.AppRouter.Location
 import diode.react.ReactPot._
 import diode.react._
@@ -14,6 +15,9 @@ import scala.scalajs.js
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.StyleSheet
+import client.components.others.ReactPaginatePage
+import client.Constants._
+import shared.requests.policies.ReadPoliciesRequest
 
 object PoliciesComponent {
 
@@ -44,6 +48,11 @@ object PoliciesComponent {
       Callback.when(props.proxy().policies.isEmpty)(props.proxy.dispatchCB(FetchPoliciesToReset))
 
     def render(p: Props, s: State) = {
+      def handlePageClick(page: ReactPaginatePage) = {
+        val request = ReadPoliciesRequest(offset = page.selected * PageSize, limit = PageSize)
+        p.proxy.dispatchCB(FetchPolicies(request)) >> p.proxy.dispatchCB(UpdateSelectedPage(page.selected))
+      }
+
       <.div(
         p.proxy().policies.renderFailed(ex => "Error loading"),
         p.proxy().policies.renderPending(_ > 500, _ => "Loading..."),
@@ -93,6 +102,19 @@ object PoliciesComponent {
                       changeCreateGroupDialogStateCallback,
                       (request) => p.proxy.dispatchCB(CreatePolicy(request))
                     ),
+                    ReactPaginate(
+                      pageCount = p.proxy().totalPages,
+                      pageRangeDisplayed = 10,
+                      marginPagesDisplayed = 2,
+                      onPageChange = js.defined(handlePageClick _),
+                      containerClassName = js.defined("pagination"),
+                      activeClassName = js.defined("active"),
+                      breakClassName = js.defined("break-me"),
+                      breakLabel = js.defined(<.a("...")),
+                      forcePage = js.defined(p.proxy().selectedPage),
+                      disableInitialCallback = js.defined(false)
+
+                    )(),
                     MuiCard()(
                       MuiCardHeader(
                         title = <.span(<.b(s"Policies")).render
@@ -100,11 +122,8 @@ object PoliciesComponent {
                       PolicyList(
                         p.router,
                         policyDetails,
-                        p.proxy().offset,
-                        p.proxy().total,
                         (request) => p.proxy.dispatchCB(DeletePolicy(request)),
-                        (request) => p.proxy.dispatchCB(UpdatePolicy(request)),
-                        (request) => p.proxy.dispatchCB(FetchPoliciesToConcat(request))
+                        (request) => p.proxy.dispatchCB(UpdatePolicy(request))
                       )
                     )
                   )

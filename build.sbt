@@ -30,6 +30,7 @@ lazy val client: Project = (project in file("client"))
       "react"                             -> Settings.versions.reactVersion,
       "react-dom"                         -> Settings.versions.reactVersion,
       "react-infinite"                    -> Settings.versions.reactInfinite,
+      "react-paginate"                    -> "4.4.4",
       "material-ui"                       -> Settings.versions.MuiVersion,
       "react-tap-event-plugin"            -> "2.0.1",
       "jquery"                            -> Settings.versions.jQuery,
@@ -84,7 +85,7 @@ lazy val ReleaseCmd = Command.command("release") { state =>
   state
 }
 
-// lazy val root = (project in file(".")).aggregate(client, server)
+ lazy val root = (project in file(".")).aggregate(client, server)
 
 // loads the Play server project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value

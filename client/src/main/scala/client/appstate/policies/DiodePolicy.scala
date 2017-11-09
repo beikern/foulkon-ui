@@ -4,11 +4,12 @@ import autowire._
 import diode._
 import diode.data._
 import shared.entities.PolicyDetail
-import shared.{Api, FoulkonError, Offset, Total}
+import shared._
 import client.services.AjaxClient
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import boopickle.Default._
+import client.Constants.PageSize
 import client.MessageFeedback
 import client.appstate.{Policies, PolicyFeedbackReporting}
 import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}
@@ -17,16 +18,15 @@ import shared.responses.policies.DeletePolicyResponse
 import scala.concurrent.Future
 
 // Policies Actions
-case object FetchPoliciesToReset                                                          extends Action
-case class ResetPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])])     extends Action
-case class FetchPoliciesToConcat(request: ReadPoliciesRequest)                            extends Action
-case class ConcatNewPolicies(policies: Either[FoulkonError, (Total, List[PolicyDetail])]) extends Action
-case class CreatePolicy(request: CreatePolicyRequest)                                     extends Action
-case class DeletePolicy(request: DeletePolicyRequest)                                     extends Action
-case class UpdatePolicy(request: UpdatePolicyRequest)                                     extends Action
-case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback]) extends Action
-case class UpdateTotalIncrementPolicyOffset(total: Total, updatedOffset: Offset)          extends Action
-case class ResetTotalResetPolicyOffset(total: Total, Offset: Offset)                      extends Action
+object FetchPoliciesToReset                                                                 extends Action
+case class SetPolicies(policies: Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]) extends Action
+case class FetchPolicies(request: ReadPoliciesRequest)                                      extends Action
+case class CreatePolicy(request: CreatePolicyRequest)                                       extends Action
+case class DeletePolicy(request: DeletePolicyRequest)                                       extends Action
+case class UpdatePolicy(request: UpdatePolicyRequest)                                       extends Action
+case class UpdatePolicyFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])   extends Action
+case class UpdateTotalPoliciesAndPages(totalPolicies: TotalPolicies)                        extends Action
+case class UpdateSelectedPage(selectedPage: SelectedPage)                                   extends Action
 
 // Policies Handlers
 class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler(modelRW) {
@@ -35,32 +35,30 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
       effectOnly(
         Effect(
           AjaxClient[Api]
-            .readPolicies(ReadPoliciesRequest())
+            .readPolicies(ReadPoliciesRequest(limit = PageSize))
             .call
             .map(
               policiesDetailEither =>
-                ResetPolicies(
-                  policiesDetailEither
-              )
+                SetPolicies(policiesDetailEither)
             )
         )
       )
-    case ResetPolicies(policies) =>
+    case SetPolicies(policies) =>
       policies match {
-        case rightResult @ Right((total, fetchedPoliciesToReset)) =>
+        case rightResult @ Right((total, _)) =>
           updated(
             Ready(Policies(rightResult.map(_._2))),
-            Effect(Future(ResetTotalResetPolicyOffset(total, fetchedPoliciesToReset.size)))
+            Effect(Future(UpdateTotalPoliciesAndPages(total)))
           )
         case leftResult @ Left(_) =>
           updated(
             Ready(Policies(leftResult.map(_._2))),
             Effect(
-              Future(ResetTotalResetPolicyOffset(0, 0))
+              Future(UpdateTotalPoliciesAndPages(0))
             )
           )
       }
-    case FetchPoliciesToConcat(request) =>
+    case FetchPolicies(request) =>
       effectOnly(
         Effect(
           AjaxClient[Api]
@@ -68,39 +66,10 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .call
             .map(
               policiesDetailEither =>
-                ConcatNewPolicies(
-                  policiesDetailEither
-              )
+                SetPolicies(policiesDetailEither)
             )
         )
       )
-    case ConcatNewPolicies(policies) =>
-      policies match {
-        case rightResult @ Right((total, fetchedPolicies)) =>
-          if (modelRW.value.isEmpty) {
-            updated(
-              Ready(Policies(rightResult.map(_._2))),
-              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
-            )
-          } else {
-            val concatResult = modelRW.value.map(
-              _.policies.map { statePolicies =>
-                statePolicies ::: fetchedPolicies
-              }
-            )
-            updated(
-              concatResult.map(Policies),
-              Effect(Future(UpdateTotalIncrementPolicyOffset(total, fetchedPolicies.size)))
-            )
-          }
-        case leftResult @ Left(_) =>
-          updated(
-            Ready(Policies(leftResult.map(_._2))),
-            Effect(
-              Future(ResetTotalResetPolicyOffset(0, 0))
-            )
-          )
-      }
 
     case CreatePolicy(request) =>
       effectOnly(
@@ -148,13 +117,14 @@ class PolicyFeedbackHandler[M](modelRW: ModelRW[M, Option[PolicyFeedbackReportin
   }
 }
 
-class PolicyOffsetHandler[M](modelRW: ModelRW[M, (Total, Offset)]) extends ActionHandler(modelRW) {
+class PolicyPagesAndTotalHandler[M](modelRW: ModelRW[M, (TotalPolicies, TotalPages, SelectedPage)]) extends ActionHandler(modelRW) {
   override protected def handle: PartialFunction[Any, ActionResult[M]] = {
-    case UpdateTotalIncrementPolicyOffset(total, offset) =>
-      val (_, stateOffset) = modelRW.value
-      updated(total -> (stateOffset + offset))
-
-    case ResetTotalResetPolicyOffset(total, offset) =>
-      updated(total -> offset)
+    case UpdateTotalPoliciesAndPages(totalPolicies) =>
+      val totalPages        = (totalPolicies.toFloat / PageSize.toFloat).ceil.toInt
+      val stateSelectedPage = modelRW()._3
+      updated((totalPolicies, totalPages, stateSelectedPage))
+    case UpdateSelectedPage(selectedPage) =>
+      println("executed selectedPage :(")
+      updated(modelRW().copy(_3 = selectedPage))
   }
 }
