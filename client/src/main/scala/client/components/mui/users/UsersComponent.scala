@@ -14,6 +14,7 @@ import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.StyleSheet
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
+import client.appstate.users.{CreateUser, DeleteUser, ObtainUserGroupFromExternalId, RefreshUsers}
 
 object UsersComponent {
 

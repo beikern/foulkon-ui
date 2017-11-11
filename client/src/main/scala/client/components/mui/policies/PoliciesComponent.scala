@@ -113,7 +113,6 @@ object PoliciesComponent {
                       breakLabel = js.defined(<.a("...")),
                       forcePage = js.defined(p.proxy().selectedPage),
                       disableInitialCallback = js.defined(false)
-
                     )(),
                     MuiCard()(
                       MuiCardHeader(

@@ -10,11 +10,11 @@ import shared.requests.policies.{DeletePolicyRequest, UpdatePolicyRequest}
 object PolicyList {
 
   case class Props(
-                    router: RouterCtl[Location],
-                    policies: List[PolicyDetail],
-                    deletePolicyCallback: (DeletePolicyRequest) => Callback,
-                    updatePolicyCallback: (UpdatePolicyRequest) => Callback
-                  )
+      router: RouterCtl[Location],
+      policies: List[PolicyDetail],
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
+  )
 
   private val component = ScalaComponent
     .builder[Props]("PolicyList")
@@ -23,12 +23,12 @@ object PolicyList {
         <.div(
           p.policies.map { policyDetail =>
             <.div(^.className := "card-nested-padded",
-              PolicyCard(
-                p.router,
-                policyDetail,
-                p.deletePolicyCallback,
-                p.updatePolicyCallback
-              ))
+                  PolicyCard(
+                    p.router,
+                    policyDetail,
+                    p.deletePolicyCallback,
+                    p.updatePolicyCallback
+                  ))
           }.toTagMod
         )
       }
@@ -36,11 +36,11 @@ object PolicyList {
     .build
 
   def apply(
-             router: RouterCtl[Location],
-             policies: List[PolicyDetail],
-             deletePolicyCallback: (DeletePolicyRequest) => Callback,
-             updatePolicyCallback: (UpdatePolicyRequest) => Callback
-           ) = component(
+      router: RouterCtl[Location],
+      policies: List[PolicyDetail],
+      deletePolicyCallback: (DeletePolicyRequest) => Callback,
+      updatePolicyCallback: (UpdatePolicyRequest) => Callback
+  ) = component(
     Props(
       router,
       policies,

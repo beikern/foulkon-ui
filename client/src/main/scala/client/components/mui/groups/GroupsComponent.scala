@@ -4,6 +4,7 @@ package components.mui.groups
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
 import client.appstate._
+import client.appstate.groups._
 import client.routes.AppRouter.Location
 import diode.data.Pot
 import diode.react.ReactPot._
