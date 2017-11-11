@@ -1,7 +1,8 @@
 package client.components.mui.groups
 
 import chandu0101.scalajs.react.components.materialui.MuiSnackbar
-import client.appstate.{GroupFeedbackReporting, RemoveGroupFeedbackReporting}
+import client.appstate.GroupFeedbackReporting
+import client.appstate.groups.RemoveGroupFeedbackReporting
 import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

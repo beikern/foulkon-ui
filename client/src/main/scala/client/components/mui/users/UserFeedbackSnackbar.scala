@@ -1,7 +1,8 @@
 package client.components.mui.users
 
 import chandu0101.scalajs.react.components.materialui.MuiSnackbar
-import client.appstate.{RemoveUserFeedbackReporting, UserFeedbackReporting}
+import client.appstate.UserFeedbackReporting
+import client.appstate.users.RemoveUserFeedbackReporting
 import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

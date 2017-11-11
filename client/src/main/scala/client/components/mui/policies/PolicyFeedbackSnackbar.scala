@@ -1,7 +1,8 @@
 package client.components.mui.policies
 
 import chandu0101.scalajs.react.components.materialui.MuiSnackbar
-import client.appstate.{PolicyFeedbackReporting, RemoveGroupFeedbackReporting}
+import client.appstate.PolicyFeedbackReporting
+import client.appstate.groups.RemoveGroupFeedbackReporting
 import diode.react._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._

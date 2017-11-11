@@ -8,6 +8,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
+import client.appstate.groups.members.{AddGroupMember, RemoveGroupMember}
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
