@@ -10,8 +10,9 @@ import shared.responses.users._
 trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
 
   val listAllUsersRequest =
+    (request: ReadUsersRequest) =>
     sttp
-      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users?Limit=1000")
+      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users?Offset=${request.offset}&Limit=${request.limit}")
       .contentType("application/json")
       .auth
       .basic(foulkonUser, foulkonPassword)

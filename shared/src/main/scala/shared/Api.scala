@@ -8,15 +8,15 @@ import shared.responses.groups.policies._
 import shared.responses.groups._
 import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
 import shared.requests.policies._
+import shared.requests.users.ReadUsersRequest
 import shared.responses.policies._
 import shared.responses.users._
 
 import scala.concurrent.Future
 
-
 trait Api {
   def createUser(externalId: String, path: String): Future[Either[FoulkonError, UserDetail]]
-  def readUsers(): Future[Either[FoulkonError, List[UserDetail]]]
+  def readUsers(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]]
   def deleteUser(externalId: String): Future[Either[FoulkonError, UserDeleteResponse]]
   def readUserGroups(externalId: String): Future[Either[FoulkonError, List[UserGroup]]]
   def createGroup(request: CreateGroupRequest): Future[Either[FoulkonError, GroupDetail]]

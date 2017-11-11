@@ -1,20 +1,21 @@
 package client.components.mui
 package users
 
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
-import client.appstate._
+import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
+import client.appstate.users._
+import client.components.others.{ReactPaginate, ReactPaginatePage}
 import diode.react.ReactPot._
 import diode.react._
-import diode.data.Pot
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import shared.requests.users.ReadUsersRequest
+import client.Constants._
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.StyleSheet
-import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
-import client.appstate.users.{CreateUser, DeleteUser, ObtainUserGroupFromExternalId, RefreshUsers}
 
 object UsersComponent {
 
@@ -25,7 +26,7 @@ object UsersComponent {
     )
   }
 
-  case class Props(proxy: ModelProxy[Pot[Users]])
+  case class Props(proxy: ModelProxy[UserComponentZoomedModel])
   case class State(createUserDialogOpened: Boolean = false)
 
   class Backend($ : BackendScope[Props, State]) {
@@ -33,34 +34,92 @@ object UsersComponent {
       $.modState(s => s.copy(createUserDialogOpened = dialogState))
     }
 
-    def showAreYouSureDialog(event: ReactEvent): Callback = {
+    def showCreateUserDialog(event: ReactEvent): Callback = {
       $.modState(s => s.copy(createUserDialogOpened = true))
     }
 
     def mounted(props: Props) =
-      Callback.when(props.proxy().isEmpty)(props.proxy.dispatchCB(RefreshUsers))
+      Callback.when(props.proxy().users.isEmpty)(props.proxy.dispatchCB(FetchUsersToReset))
 
     def render(p: Props, s: State) = {
+      def handlePageClick(page: ReactPaginatePage) = {
+        val request = ReadUsersRequest(offset = page.selected * PageSize, limit = PageSize)
+        p.proxy.dispatchCB(FetchUsers(request)) >> p.proxy.dispatchCB(UpdateSelectedPage(page.selected))
+      }
       <.div(
         CreateUserDialog(
           s.createUserDialogOpened,
           changeCreateUserDialogStateCallback,
           (externalId, path) => p.proxy.dispatchCB(CreateUser(externalId, path))
         ),
-        p.proxy().renderFailed(ex => "Error loading"),
-        p.proxy().renderPending(_ > 500, _ => "Loading..."),
-        p.proxy()
+        ReactPaginate(
+          pageCount = p.proxy().totalPages,
+          pageRangeDisplayed = 10,
+          marginPagesDisplayed = 2,
+          onPageChange = js.defined(handlePageClick _),
+          containerClassName = js.defined("pagination"),
+          activeClassName = js.defined("active"),
+          breakClassName = js.defined("break-me"),
+          breakLabel = js.defined(<.a("...")),
+          forcePage = js.defined(p.proxy().selectedPage),
+          disableInitialCallback = js.defined(false)
+        )(),
+        p.proxy().users.renderFailed(ex => "Error loading"),
+        p.proxy().users.renderPending(_ > 500, _ => "Loading..."),
+        p.proxy().users.renderEmpty(
+            <.div(
+              MuiCard()(
+                MuiCardHeader(
+                  title = <.span(<.b(s"Users")).render
+                )(),
+                MuiCardText()(<.div("There's no users defined. Sorry! If you want to add one click the + button."))
+              )
+            )
+          ),
+        p.proxy().users
           .render(
             usersFromProxy =>
-              UserList(
-                usersFromProxy.users,
-                id => p.proxy.dispatchCB(ObtainUserGroupFromExternalId(id)),
-                id => p.proxy.dispatchCB(DeleteUser(id))
-            )
+              usersFromProxy.users match {
+                case Right(List()) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Users")).render
+                      )(),
+                      MuiCardText()(<.div("There's no users defined. Sorry! If you want to add one click the + button."))
+                    )
+                  )
+                case Right(userDetails) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Users")).render
+                      )(),
+                      UserList(
+                        userDetails,
+                        id => p.proxy.dispatchCB(FetchUserGroupFromExternalId(id)),
+                        id => p.proxy.dispatchCB(DeleteUser(id))
+                      )
+                    )
+                  )
+                case Left(foulkonError) =>
+                  <.div(
+                    ^.className := "card-padded",
+                    MuiCard()(
+                      MuiCardHeader(
+                        title = <.span(<.b(s"Users")).render
+                      )(),
+                      MuiCardText()(<.div(
+                        s"Can't show users because the following foulkon error. Code: ${foulkonError.code}, message: ${foulkonError.message}. Sorry!"))
+                    )
+                  )
+            }
           ),
         <.div(
           Style.createUserButton,
-          MuiFloatingActionButton(onTouchTap = js.defined(showAreYouSureDialog _))(
+          MuiFloatingActionButton(onTouchTap = js.defined(showCreateUserDialog _))(
             Mui.SvgIcons.ContentAdd.apply(style = js.Dynamic.literal(width = "30px", height = "30px"))()
           )
         )
@@ -75,6 +134,6 @@ object UsersComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(proxy: ModelProxy[Pot[Users]]) = component(Props(proxy))
+  def apply(proxy: ModelProxy[UserComponentZoomedModel]) = component(Props(proxy))
 
 }

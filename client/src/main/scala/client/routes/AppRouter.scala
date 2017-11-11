@@ -5,6 +5,7 @@ import java.util.UUID
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
 import client.appstate.policies.PolicyComponentZoomedModel
+import client.appstate.users.UserComponentZoomedModel
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
 import client.components.mui.groups.policies.GroupPoliciesComponent
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
@@ -35,7 +36,14 @@ object AppRouter {
     .buildConfig { dsl =>
       import dsl._
 
-      val userWrapper         = SPACircuit.connect(_.userModule.users)
+      val userWrapper = SPACircuit.connect(
+        rootModel =>
+          UserComponentZoomedModel(
+            rootModel.userModule.users,
+            rootModel.userModule.totalPages,
+            rootModel.userModule.selectedPage
+        )
+      )
       val userFeedbackWrapper = SPACircuit.connect(_.userModule.feedbackReporting)
 
       val groupWrapper         = SPACircuit.connect(_.groupModule)
