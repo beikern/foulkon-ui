@@ -31,7 +31,6 @@ case class GroupMetadataWithPolicy(
     policyInfo: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]
 )
 
-
 // Users
 case class UserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
 case class Users(users: Either[FoulkonError, Map[String, UserWithGroup]])
@@ -85,8 +84,9 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
       zoomRW(_.groupModule.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupMemberFeedbackReporting = v)))),
     new GroupPolicyHandler(zoomRW(_.groupModule.policies)((m, v) => m.copy(groupModule = m.groupModule.copy(policies = v)))),
     new PolicyHandler(zoomRW(_.policyModule.policies)((m, v) => m.copy(policyModule = m.policyModule.copy(policies = v)))),
-    new PolicyPagesAndTotalHandler(zoomRW(root => (root.policyModule.nPolicies, root.policyModule.totalPages, root.policyModule.selectedPage))((m, v) =>
-      m.copy(policyModule = m.policyModule.copy(nPolicies = v._1, totalPages = v._2, selectedPage = v._3)))),
+    new PolicyPagesAndTotalHandler(
+      zoomRW(root => (root.policyModule.nPolicies, root.policyModule.totalPages, root.policyModule.selectedPage))((m, v) =>
+        m.copy(policyModule = m.policyModule.copy(nPolicies = v._1, totalPages = v._2, selectedPage = v._3)))),
     new PolicyFeedbackHandler(
       zoomRW(_.policyModule.policyFeedbackReporting)((m, v) => m.copy(policyModule = m.policyModule.copy(policyFeedbackReporting = v))))
   )

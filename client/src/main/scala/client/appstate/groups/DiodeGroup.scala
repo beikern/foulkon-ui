@@ -44,7 +44,7 @@ class GroupHandler[M](modelRW: ModelRW[M, Pot[Groups]]) extends ActionHandler(mo
               groupDetailEither =>
                 UpdateAllGroups(
                   groupDetailEither
-                )
+              )
             )
         )
       )

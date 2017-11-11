@@ -39,7 +39,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
                   userDetailEither.map { userDetailList =>
                     userDetailList.map(UserWithGroup(_))
                   }
-                )
+              )
             )
         )
       )
@@ -62,9 +62,9 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
             .map(
               userGroupEither =>
                 UpdateUserGroup(id,
-                  userGroupEither.map(
-                    ug => id -> ug
-                  ))
+                                userGroupEither.map(
+                                  ug => id -> ug
+                                ))
             )
         )
       )

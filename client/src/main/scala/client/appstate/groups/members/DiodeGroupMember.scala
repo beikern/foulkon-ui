@@ -23,7 +23,8 @@ import scala.concurrent.Future
 // Group members
 case class AddGroupMember(id: String, organizationId: String, name: String, userId: String)    extends Action
 case class RemoveGroupMember(id: String, organizationId: String, name: String, userId: String) extends Action
-case class UpdateGroupMemberFeedbackReporting(id: String, organizationId: String, name: String, feedback: Either[FoulkonError, MessageFeedback]) extends Action
+case class UpdateGroupMemberFeedbackReporting(id: String, organizationId: String, name: String, feedback: Either[FoulkonError, MessageFeedback])
+    extends Action
 case object RemoveGroupMemberFeedbackReporting extends Action
 
 // Handlers
@@ -40,7 +41,8 @@ class GroupMemberHandler[M](modelRW: ModelRW[M, Map[String, GroupMetadataWithMem
       effectOnly(
         Effect(
           AjaxClient[Api]
-            .addMemberGroup(request).call
+            .addMemberGroup(request)
+            .call
             .map {
               case Left(foulkonError) => UpdateGroupMemberFeedbackReporting(id, organizationId, name, Left(foulkonError))
               case Right(_)           => UpdateGroupMemberFeedbackReporting(id, organizationId, name, Right(s"member $userId associated successfully!"))

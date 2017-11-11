@@ -38,8 +38,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .readPolicies(ReadPoliciesRequest(limit = PageSize))
             .call
             .map(
-              policiesDetailEither =>
-                SetPolicies(policiesDetailEither)
+              policiesDetailEither => SetPolicies(policiesDetailEither)
             )
         )
       )
@@ -65,8 +64,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
             .readPolicies(request)
             .call
             .map(
-              policiesDetailEither =>
-                SetPolicies(policiesDetailEither)
+              policiesDetailEither => SetPolicies(policiesDetailEither)
             )
         )
       )
