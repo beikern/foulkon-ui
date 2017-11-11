@@ -11,6 +11,7 @@ import shared.responses.policies.Statement
 
 import scala.collection.mutable
 import scala.scalajs.js
+import js.JSConverters._
 
 object UpdatePolicyDialog {
 
@@ -201,14 +202,16 @@ object UpdatePolicyDialog {
           MuiTextField(
             hintText = js.defined("Name"),
             onChange = js.defined(nameValidationCallback),
-            errorText = s.nameErrorText
+            errorText = s.nameErrorText,
+            defaultValue = s.nameValue.orUndefined
           )()
         ),
         <.div(
           MuiTextField(
             hintText = js.defined("Path"),
             onChange = js.defined(pathValidationCallback),
-            errorText = s.pathErrorText
+            errorText = s.pathErrorText,
+            defaultValue = s.pathValue.orUndefined
           )()
         ),
         <.div(
@@ -220,7 +223,23 @@ object UpdatePolicyDialog {
 
   val component = ScalaComponent
     .builder[Props]("UpdatePolicyDialog")
-    .initialState(State())
+    .initialStateFromProps(
+      p => {
+        val statements = mutable.LinkedHashMap(
+          p.policyDetail.statements.zipWithIndex
+            .map { case (statement, index) => index -> Some(statement) }: _*): mutable.Map[Int, Option[Statement]]
+
+        State(
+          inputValidated = true,
+          nameValidation = true,
+          nameValue = Some(p.policyDetail.name),
+          pathValidation = true,
+          pathValue = Some(p.policyDetail.path),
+          statements = statements,
+          statementKey = p.policyDetail.statements.size
+        )
+      }
+    )
     .renderBackend[Backend]
     .build
 
