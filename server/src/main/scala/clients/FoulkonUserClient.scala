@@ -5,13 +5,15 @@ import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp.{sttp, _}
 import contexts.AkkaContext
 import shared.requests.users._
+import shared.requests.users.groups.ReadUserGroupsRequest
 import shared.responses.users._
 
 trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
 
   val listAllUsersRequest =
+    (request: ReadUsersRequest) =>
     sttp
-      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users?Limit=1000")
+      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users?Offset=${request.offset}&Limit=${request.limit}")
       .contentType("application/json")
       .auth
       .basic(foulkonUser, foulkonPassword)
@@ -50,9 +52,9 @@ trait FoulkonUserClient extends FoulkonConfig { self: AkkaContext =>
         .mapResponse(_ => UserDeleteResponse(externalId))
 
   val getUserGroupRequest =
-    (externalId: String) =>
+    (request: ReadUserGroupsRequest) =>
       sttp
-        .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users/$externalId/groups?Limit=1000")
+        .get(uri"http://$foulkonHost:$foulkonPort/api/v1/users/${request.userExternalId}/groups?Offset=${request.offset}&Limit=${request.limit}")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)

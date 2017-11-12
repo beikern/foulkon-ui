@@ -1,6 +1,8 @@
 package client.components.mui
 package users
 
+import java.util.UUID
+
 import chandu0101.scalajs.react.components.materialui.{
   Mui,
   MuiCard,
@@ -12,10 +14,12 @@ import chandu0101.scalajs.react.components.materialui.{
   MuiGridList,
   MuiIconButton
 }
-import client.appstate.UserWithGroup
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
+import client.routes.AppRouter.{Location, UserGroupsLocation}
+import japgolly.scalajs.react.extra.router.RouterCtl
+import shared.entities.UserDetail
 import scala.scalajs.js
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
@@ -32,8 +36,8 @@ object UserCard {
   }
 
   case class Props(
-      userData: UserWithGroup,
-      updateGroup: String => Callback,
+      router: RouterCtl[Location],
+      userDetail: UserDetail,
       deleteUser: String => Callback
   )
 
@@ -59,32 +63,13 @@ object UserCard {
     }
 
     def render(p: Props, s: State) = {
-      val groupToRender = p.userData.group match {
-        case Right(groups) =>
-          groups.map(
-            group => GroupCard(group): VdomNode
-          )
-        case Left(error) =>
-          List(<.p(s"Error retrieving groups: $error"): VdomNode)
-      }
-
-// THIS WORKS TOO, just remove the variadic conversion
-//    val groupToRender = p.userData.group match {
-//      case Some(groups) =>
-//        groups.map(
-//          group =>
-//            GroupCard(group)
-//        ).toVdomArray
-//      case None =>
-//        <.p(""): VdomNode
-
       <.div(
-        AreYouSureDialog(p.userData.user.externalId, s.deleteDialogOpened, p.deleteUser, changeDeleteUserDialogStateCallback)(),
+        AreYouSureDialog(p.userDetail.externalId, s.deleteDialogOpened, p.deleteUser, changeDeleteUserDialogStateCallback)(),
         MuiCard(expanded = js.defined(s.groupExpanded))(
           <.div(
             MuiGridList(cellHeight = js.defined(50))(
               MuiCardHeader(
-                title = <.span(<.b(s"${p.userData.user.externalId}")).render
+                title = <.span(<.b(s"${p.userDetail.externalId}")).render
               )(),
               <.div(
                 Style.editDeleteButton,
@@ -100,24 +85,19 @@ object UserCard {
             )),
           MuiCardText()(
             <.div(
-              <.p(<.b("Path: "), s"${p.userData.user.path}"),
-              <.p(<.b("Created at: "), s"${p.userData.user.createdAt}"),
-              <.p(<.b("Updated at: "), s"${p.userData.user.updatedAt}"),
-              <.p(<.b("Urn: "), s"${p.userData.user.urn}")
+              <.p(<.b("Path: "), s"${p.userDetail.path}"),
+              <.p(<.b("Created at: "), s"${p.userDetail.createdAt}"),
+              <.p(<.b("Updated at: "), s"${p.userDetail.updatedAt}"),
+              <.p(<.b("Urn: "), s"${p.userDetail.urn}")
             )
           ),
           MuiDivider()(),
           MuiCardActions()(
             MuiFlatButton(
-              label = js.defined("GROUPS"),
               primary = js.defined(true),
-              onClick = js.defined(toggleGroup(p.updateGroup(p.userData.user.externalId), s.groupExpanded) _)
+              label = js.defined("GROUPS"),
+              href = js.defined(p.router.urlFor(UserGroupsLocation(UUID.fromString(p.userDetail.id), p.userDetail.externalId)).value)
             )()
-          ),
-          MuiCardText(expandable = js.defined(true))(
-            MuiGridList(cols = js.defined(2), padding = js.defined(8))(
-              groupToRender: _*
-            )
           )
         )
       )
@@ -130,6 +110,6 @@ object UserCard {
     .renderBackend[Backend]
     .build
 
-  def apply(userData: UserWithGroup, updateGroup: String => Callback, deleteUser: String => Callback) =
-    component(Props(userData, updateGroup, deleteUser))
+  def apply(router: RouterCtl[Location], userDetail: UserDetail, deleteUser: String => Callback) =
+    component(Props(router, userDetail, deleteUser))
 }

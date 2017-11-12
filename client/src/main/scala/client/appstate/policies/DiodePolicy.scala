@@ -9,7 +9,7 @@ import client.services.AjaxClient
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import boopickle.Default._
-import client.Constants.PageSize
+import shared.utils.Constants.PageSize
 import client.MessageFeedback
 import client.appstate.{Policies, PolicyFeedbackReporting}
 import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}
@@ -37,9 +37,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
           AjaxClient[Api]
             .readPolicies(ReadPoliciesRequest(limit = PageSize))
             .call
-            .map(
-              policiesDetailEither => SetPolicies(policiesDetailEither)
-            )
+            .map(SetPolicies)
         )
       )
     case SetPolicies(policies) =>
@@ -63,9 +61,7 @@ class PolicyHandler[M](modelRW: ModelRW[M, Pot[Policies]]) extends ActionHandler
           AjaxClient[Api]
             .readPolicies(request)
             .call
-            .map(
-              policiesDetailEither => SetPolicies(policiesDetailEither)
-            )
+            .map(SetPolicies)
         )
       )
 
@@ -122,7 +118,6 @@ class PolicyPagesAndTotalHandler[M](modelRW: ModelRW[M, (TotalPolicies, TotalPag
       val stateSelectedPage = modelRW()._3
       updated((totalPolicies, totalPages, stateSelectedPage))
     case UpdateSelectedPage(selectedPage) =>
-      println("executed selectedPage :(")
       updated(modelRW().copy(_3 = selectedPage))
   }
 }

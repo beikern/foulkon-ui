@@ -13,6 +13,8 @@ import shared.requests.groups._
 import shared.requests.groups.members._
 import shared.requests.groups.policies._
 import shared.requests.policies._
+import shared.requests.users.ReadUsersRequest
+import shared.requests.users.groups.ReadUserGroupsRequest
 import shared.responses.FoulkonErrorFromJson
 import shared.responses.groups._
 import shared.responses.groups.members._
@@ -20,7 +22,7 @@ import shared.responses.groups.policies._
 import shared.responses.policies._
 import shared.responses.users._
 import shared.utils.FoulkonErrorUtils
-import shared.{Api, FoulkonError, TotalPolicies}
+import shared._
 
 import scala.concurrent.Future
 
@@ -30,15 +32,33 @@ class ApiService(
     with AkkaContext
     with FoulkonClient {
 
+  val mockUsers: List[UserDetail] =
+    (0 to 550).toList.map { n =>
+      val ns = n.toString
+      UserDetail(
+        UUID.randomUUID().toString,
+        ns,
+        ns,
+        ns,
+        ns,
+        ns
+      )
+    }
   // USERS
-  override def readUsers(): Future[Either[FoulkonError, List[UserDetail]]] = {
+  def readUsersMock(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = {
+    println(s"readUsers mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
+    val x: Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = Future(
+      Right(mockUsers.size -> mockUsers.slice(request.offset, request.offset + request.limit)))
+    x
+  }
+  def readUsers(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = {
 
-    val listAllUserResponse = listAllUsersRequest.send().map { response =>
+    val listAllUserResponse = listAllUsersRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -57,7 +77,7 @@ class ApiService(
                   .bimap(
                     fa = error => {
                       val decodeError = decode[FoulkonErrorFromJson](error)
-                        .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+                        .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
                       FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
                     },
                     fb = responseEither => {
@@ -76,9 +96,9 @@ class ApiService(
           .map(_.sequenceU)
       }
 
-    apiResult.map {
-      _.map { userDetailResponseList =>
-        userDetailResponseList.map { userDetailResponse =>
+    apiResult.flatMap { eitherResult =>
+      val mappedResult = eitherResult.map{userDetailResultList =>
+        userDetailResultList.map{userDetailResponse =>
           UserDetail(
             userDetailResponse.id,
             userDetailResponse.externalId,
@@ -89,16 +109,33 @@ class ApiService(
           )
         }
       }
+      listAllUserResponse.map(_.map(_.total).flatMap(total => mappedResult.map(l => total -> l)))
     }
   }
 
-  override def readUserGroups(externalId: String): Future[Either[FoulkonError, List[UserGroup]]] = {
-    getUserGroupRequest(externalId).send().map { response =>
+  val mockUsersGroups: List[UserGroup] =
+    (0 to 550).toList.map { n =>
+      val ns = n.toString
+      UserGroup(
+        ns,
+        ns,
+        ns
+      )
+    }
+  // USERS
+  def readUserGroupsR(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
+    println(s"readUserGroupsMock. Request offset: ${request.offset}. Request limit: ${request.limit}")
+    val x: Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = Future(
+      Right(mockUsersGroups.size -> mockUsersGroups.slice(request.offset, request.offset + request.limit)))
+    x
+  }
+  override def readUserGroups(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
+    getUserGroupRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -106,7 +143,7 @@ class ApiService(
           }
         )
         .map { userGroupResponse =>
-          userGroupResponse.groups.map { userGroup =>
+          userGroupResponse.total -> userGroupResponse.groups.map { userGroup =>
             UserGroup(
               userGroup.org,
               userGroup.name,
@@ -122,7 +159,7 @@ class ApiService(
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
-            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
     }
@@ -134,7 +171,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -160,7 +197,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -184,7 +221,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -202,7 +239,7 @@ class ApiService(
                 .bimap(
                   fa = error => {
                     val decodeError = decode[FoulkonErrorFromJson](error)
-                      .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+                      .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
                     FoulkonErrorUtils.parseError(request.code, decodeError.code, decodeError.message)
                   },
                   fb = responseEither => {
@@ -243,7 +280,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -266,7 +303,7 @@ class ApiService(
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
-            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
     }
@@ -277,7 +314,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -291,7 +328,7 @@ class ApiService(
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
-            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
     }
@@ -301,7 +338,7 @@ class ApiService(
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
-            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
     }
@@ -312,7 +349,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -328,7 +365,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -353,7 +390,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
@@ -377,7 +414,7 @@ class ApiService(
                 .bimap(
                   fa = error => {
                     val decodeError = decode[FoulkonErrorFromJson](error)
-                      .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+                      .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
                     FoulkonErrorUtils.parseError(request.code, decodeError.code, decodeError.message)
                   },
                   fb = responseEither => {
@@ -440,7 +477,7 @@ class ApiService(
       response.body
         .leftMap { error =>
           val decodeError = decode[FoulkonErrorFromJson](error)
-            .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+            .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
           FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
         }
     }
@@ -451,7 +488,7 @@ class ApiService(
         .bimap(
           fa = error => {
             val decodeError = decode[FoulkonErrorFromJson](error)
-              .getOrElse(FoulkonErrorFromJson("UnkownError", "There was an unknown error."))
+              .getOrElse(FoulkonErrorFromJson("UnknownError", "There was an unknown error."))
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {

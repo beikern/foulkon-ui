@@ -6,13 +6,13 @@ import client.appstate.groups.{GroupFeedbackHandler, GroupHandler}
 import diode._
 import diode.data._
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
-import shared.FoulkonError
+import shared._
 import client.appstate.policies.{PolicyFeedbackHandler, PolicyHandler, PolicyPagesAndTotalHandler}
-import client.appstate.users.{UserFeedbackHandler, UserHandler}
+import client.appstate.users._
+import client.appstate.users.groups.{UserGroupHandler, UserGroupsPagesAndTotalHandler}
 import diode.react.ReactConnector
 import shared.responses.groups.members.MemberAssociatedToGroupInfo
 import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
-import shared.{SelectedPage, TotalPages, TotalPolicies}
 
 case class UserWithGroup(
     user: UserDetail,
@@ -33,8 +33,23 @@ case class GroupMetadataWithPolicy(
 
 // Users
 case class UserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
-case class Users(users: Either[FoulkonError, Map[String, UserWithGroup]])
-case class UserModule(users: Pot[Users], feedbackReporting: Option[UserFeedbackReporting])
+case class UserGroups(userGroups: Either[FoulkonError, List[UserGroup]])
+case class UserGroupsModule(
+    userGroups: Pot[UserGroups],
+    userExternalId: Option[String],
+    nUserGroups: TotalUserGroups,
+    totalPages: TotalPages,
+    selectedPage: SelectedPage
+)
+case class Users(users: Either[FoulkonError, List[UserDetail]])
+case class UserModule(
+    users: Pot[Users],
+    nUsers: TotalPolicies,
+    totalPages: TotalPages,
+    selectedPage: SelectedPage,
+    selectedUserGroups: UserGroupsModule,
+    feedbackReporting: Option[UserFeedbackReporting]
+)
 
 // Groups
 case class GroupFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
@@ -71,11 +86,52 @@ case class RootModel(
 // Application circuit
 object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def initialModel: RootModel =
-    RootModel(UserModule(Empty, None), GroupModule(Empty, Map(), Map(), None, None), PolicyModule(Empty, 0, 0, 0, None))
+    RootModel(
+      UserModule(
+        users = Empty,
+        nUsers = 0,
+        totalPages = 0,
+        selectedPage = 0,
+        UserGroupsModule(
+          userGroups = Empty,
+          userExternalId = None,
+          nUserGroups = 0,
+          totalPages = 0,
+          selectedPage = 0
+        ),
+        feedbackReporting = None
+      ),
+      GroupModule(
+        groups = Empty,
+        members = Map(),
+        policies = Map(),
+        groupFeedbackReporting = None,
+        groupMemberFeedbackReporting = None
+      ),
+      PolicyModule(
+        policies = Empty,
+        nPolicies = 0,
+        totalPages = 0,
+        selectedPage = 0,
+        policyFeedbackReporting = None
+      )
+    )
 
   override protected def actionHandler: SPACircuit.HandlerFunction = composeHandlers(
     new UserHandler(zoomRW(_.userModule.users)((m, v) => m.copy(userModule = m.userModule.copy(users = v)))),
     new UserFeedbackHandler(zoomRW(_.userModule.feedbackReporting)((m, v) => m.copy(userModule = m.userModule.copy(feedbackReporting = v)))),
+    new UserPagesAndTotalHandler(zoomRW(root => (root.userModule.nUsers, root.userModule.totalPages, root.userModule.selectedPage))((m, v) =>
+      m.copy(userModule = m.userModule.copy(nUsers = v._1, totalPages = v._2, selectedPage = v._3)))),
+    new UserGroupHandler(zoomRW(_.userModule.selectedUserGroups.userGroups)((m, v) =>
+      m.copy(userModule = m.userModule.copy(selectedUserGroups = m.userModule.selectedUserGroups.copy(userGroups = v))))),
+    new UserGroupsPagesAndTotalHandler(
+      zoomRW(
+        root =>
+          (root.userModule.selectedUserGroups.nUserGroups,
+           root.userModule.selectedUserGroups.totalPages,
+           root.userModule.selectedUserGroups.selectedPage))((m, v) =>
+        m.copy(userModule = m.userModule.copy(
+          selectedUserGroups = m.userModule.selectedUserGroups.copy(nUserGroups = v._1, totalPages = v._2, selectedPage = v._3))))),
     new GroupHandler(zoomRW(_.groupModule.groups)((m, v) => m.copy(groupModule = m.groupModule.copy(groups = v)))),
     new GroupFeedbackHandler(
       zoomRW(_.groupModule.groupFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupFeedbackReporting = v)))),

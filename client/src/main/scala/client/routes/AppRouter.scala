@@ -5,6 +5,8 @@ import java.util.UUID
 import chandu0101.scalajs.react.components.materialui.MuiMuiThemeProvider
 import client.appstate.SPACircuit
 import client.appstate.policies.PolicyComponentZoomedModel
+import client.appstate.users.UserComponentZoomedModel
+import client.appstate.users.groups.UserGroupsComponentZoomedModel
 import client.components.mui.groups.members.{GroupMemberFeedbackSnackbar, MembersComponent}
 import client.components.mui.groups.policies.GroupPoliciesComponent
 import client.components.mui.groups.{GroupFeedbackSnackbar, GroupsComponent}
@@ -14,7 +16,7 @@ import client.components.mui.users.{UserFeedbackSnackbar, UsersComponent}
 import client.components.mui.{CountAndFilterToolBar, NavToolBar}
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
-
+import client.components.mui.users.groups.UserGroupsComponent
 object AppRouter {
 
   case class GroupUUID(id: UUID)
@@ -22,6 +24,8 @@ object AppRouter {
   sealed trait Location
 
   case object UsersLocation                     extends Location
+  case class UserGroupsLocation(userId: UUID, userExternalId: String) extends Location
+  case class UserGroupsExternalIdLocation(externalId: String) extends Location
   case object GroupsLocation                    extends Location
   case object PoliciesLocation                  extends Location
   case object ProxyResourcesLocation            extends Location
@@ -35,7 +39,24 @@ object AppRouter {
     .buildConfig { dsl =>
       import dsl._
 
-      val userWrapper         = SPACircuit.connect(_.userModule.users)
+      val userWrapper = SPACircuit.connect(
+        rootModel =>
+          UserComponentZoomedModel(
+            rootModel.userModule.users,
+            rootModel.userModule.totalPages,
+            rootModel.userModule.selectedPage
+        )
+      )
+
+      val userGroupWrapper = SPACircuit.connect(
+        rootModel =>
+          UserGroupsComponentZoomedModel(
+            rootModel.userModule.selectedUserGroups.userGroups,
+            rootModel.userModule.selectedUserGroups.totalPages,
+            rootModel.userModule.selectedUserGroups.selectedPage
+          )
+      )
+
       val userFeedbackWrapper = SPACircuit.connect(_.userModule.feedbackReporting)
 
       val groupWrapper         = SPACircuit.connect(_.groupModule)
@@ -66,10 +87,19 @@ object AppRouter {
             ctl =>
               <.div(
                 MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("Users", 1))),
-                MuiMuiThemeProvider()(userWrapper(UsersComponent(_))),
+                MuiMuiThemeProvider()(userWrapper(UsersComponent(_, ctl))),
                 MuiMuiThemeProvider()(userFeedbackWrapper(UserFeedbackSnackbar(_)))
             )
           )
+
+      val userGroupsRoute: Rule = dynamicRouteCT(("#users" / uuid / "externalid" / string("[\\w+.@=\\-_]+") /"groups").caseClass[UserGroupsLocation]) ~>
+        dynRenderR(
+          (p: UserGroupsLocation, ctl) =>
+            <.div(
+              MuiMuiThemeProvider()(CountAndFilterToolBar(CountAndFilterToolBar.Props("User groups", 1))),
+              MuiMuiThemeProvider()(userGroupWrapper(UserGroupsComponent(p.userId.toString, p.userExternalId, _, ctl)))
+            )
+        )
 
       // GROUPS
       val groupsRoute: Rule =
@@ -126,6 +156,7 @@ object AppRouter {
 
       (emptyRule
         | usersRoute
+        | userGroupsRoute
         | groupsRoute
         | groupMembersRoute
         | groupPoliciesRoute
