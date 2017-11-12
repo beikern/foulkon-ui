@@ -9,6 +9,7 @@ import shared.responses.groups._
 import shared.requests.groups.policies.PoliciesAssociatedToGroupRequest
 import shared.requests.policies._
 import shared.requests.users.ReadUsersRequest
+import shared.requests.users.groups.ReadUserGroupsRequest
 import shared.responses.policies._
 import shared.responses.users._
 
@@ -18,7 +19,7 @@ trait Api {
   def createUser(externalId: String, path: String): Future[Either[FoulkonError, UserDetail]]
   def readUsers(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]]
   def deleteUser(externalId: String): Future[Either[FoulkonError, UserDeleteResponse]]
-  def readUserGroups(externalId: String): Future[Either[FoulkonError, List[UserGroup]]]
+  def readUserGroups(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]]
   def createGroup(request: CreateGroupRequest): Future[Either[FoulkonError, GroupDetail]]
   def readGroups(): Future[Either[FoulkonError, List[GroupDetail]]]
   def updateGroup(request: UpdateGroupRequest): Future[Either[FoulkonError, GroupDetail]]

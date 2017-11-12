@@ -1,15 +1,17 @@
 package client.components.mui
 package users
 
+import client.routes.AppRouter.Location
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.entities.UserDetail
 
 object UserList {
 
   case class Props(
+      router: RouterCtl[Location],
       users: List[UserDetail],
-      updateGroup: String => Callback,
       deleteUser: String => Callback
   )
 
@@ -22,8 +24,8 @@ object UserList {
           userDetail =>
             <.div(^.className := "card-padded",
               UserCard(
+                p.router,
                 userDetail,
-                p.updateGroup,
                 p.deleteUser
               ))
         ).toTagMod
@@ -32,8 +34,8 @@ object UserList {
     .build
 
   def apply(
+    router: RouterCtl[Location],
     users: List[UserDetail],
-    updateGroup: String => Callback,
     deleteUser: String => Callback
-  ) = UserList(Props(users, updateGroup, deleteUser))
+  ) = UserList(Props(router, users, deleteUser))
 }

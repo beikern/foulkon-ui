@@ -16,7 +16,7 @@ import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
 import scalacss.internal.mutable.StyleSheet
 import client.components.others.ReactPaginatePage
-import client.Constants._
+import shared.utils.Constants._
 import shared.requests.policies.ReadPoliciesRequest
 
 object PoliciesComponent {

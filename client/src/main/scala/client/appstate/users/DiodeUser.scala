@@ -10,7 +10,7 @@ import shared._
 import shared.entities.{UserDetail, UserGroup}
 import shared.responses.users.UserDeleteResponse
 import boopickle.Default._
-import client.Constants.PageSize
+import shared.utils.Constants._
 import shared.requests.users.ReadUsersRequest
 
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
       effectOnly(
         Effect(
           AjaxClient[Api]
-            .readUsers(ReadUsersRequest(limit = PageSize))
+            .readUsers(ReadUsersRequest(offset = 0))
             .call
             .map(SetUsers)
         )
@@ -103,7 +103,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
               case Right(UserDeleteResponse(eId)) => UpdateUserFeedbackReporting(Right(s"User $eId deleted successfully!"))
             }
         ) >> Effect(Future(FetchUsersToReset))
-          >> Effect(Future(UpdateSelectedPage(0)))
+          >> Effect(Future(groups.UpdateSelectedPage(0)))
       )
     case CreateUser(externalId, path) =>
       effectOnly(
@@ -116,7 +116,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
               case Right(UserDetail(_, eId, _, _, _, _)) => UpdateUserFeedbackReporting(Right(s"User $eId created successfully!"))
             }
         ) >> Effect(Future(FetchUsersToReset))
-          >> Effect(Future(UpdateSelectedPage(0)))
+          >> Effect(Future(groups.UpdateSelectedPage(0)))
       )
   }
 }

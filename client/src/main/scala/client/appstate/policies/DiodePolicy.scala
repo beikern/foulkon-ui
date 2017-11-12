@@ -9,7 +9,7 @@ import client.services.AjaxClient
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import boopickle.Default._
-import client.Constants.PageSize
+import shared.utils.Constants.PageSize
 import client.MessageFeedback
 import client.appstate.{Policies, PolicyFeedbackReporting}
 import shared.requests.policies.{CreatePolicyRequest, DeletePolicyRequest, ReadPoliciesRequest, UpdatePolicyRequest}

@@ -1,6 +1,8 @@
 package client.components.mui
 package users
 
+import java.util.UUID
+
 import chandu0101.scalajs.react.components.materialui.{
   Mui,
   MuiCard,
@@ -15,8 +17,9 @@ import chandu0101.scalajs.react.components.materialui.{
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
+import client.routes.AppRouter.{Location, UserGroupsLocation}
+import japgolly.scalajs.react.extra.router.RouterCtl
 import shared.entities.UserDetail
-
 import scala.scalajs.js
 import scalacss.ProdDefaults._
 import scalacss.ScalaCssReact._
@@ -33,8 +36,8 @@ object UserCard {
   }
 
   case class Props(
+      router: RouterCtl[Location],
       userDetail: UserDetail,
-      updateGroup: String => Callback,
       deleteUser: String => Callback
   )
 
@@ -91,8 +94,9 @@ object UserCard {
           MuiDivider()(),
           MuiCardActions()(
             MuiFlatButton(
+              primary = js.defined(true),
               label = js.defined("GROUPS"),
-              primary = js.defined(true)
+              href = js.defined(p.router.urlFor(UserGroupsLocation(UUID.fromString(p.userDetail.id), p.userDetail.externalId)).value)
             )()
           )
         )
@@ -106,6 +110,6 @@ object UserCard {
     .renderBackend[Backend]
     .build
 
-  def apply(userDetail: UserDetail, updateGroup: String => Callback, deleteUser: String => Callback) =
-    component(Props(userDetail, updateGroup, deleteUser))
+  def apply(router: RouterCtl[Location], userDetail: UserDetail, deleteUser: String => Callback) =
+    component(Props(router, userDetail, deleteUser))
 }

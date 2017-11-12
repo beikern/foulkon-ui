@@ -5,12 +5,14 @@ import chandu0101.scalajs.react.components.materialui.MuiSvgIcon._
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiCard, MuiCardHeader, MuiCardText, MuiFloatingActionButton}
 import client.appstate.users._
 import client.components.others.{ReactPaginate, ReactPaginatePage}
+import client.routes.AppRouter.Location
 import diode.react.ReactPot._
 import diode.react._
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.requests.users.ReadUsersRequest
-import client.Constants._
+import shared.utils.Constants._
 
 import scala.scalajs.js
 import scalacss.ProdDefaults._
@@ -26,7 +28,7 @@ object UsersComponent {
     )
   }
 
-  case class Props(proxy: ModelProxy[UserComponentZoomedModel])
+  case class Props(proxy: ModelProxy[UserComponentZoomedModel], router: RouterCtl[Location])
   case class State(createUserDialogOpened: Boolean = false)
 
   class Backend($ : BackendScope[Props, State]) {
@@ -43,7 +45,7 @@ object UsersComponent {
 
     def render(p: Props, s: State) = {
       def handlePageClick(page: ReactPaginatePage) = {
-        val request = ReadUsersRequest(offset = page.selected * PageSize, limit = PageSize)
+        val request = ReadUsersRequest(offset = page.selected * PageSize)
         p.proxy.dispatchCB(FetchUsers(request)) >> p.proxy.dispatchCB(UpdateSelectedPage(page.selected))
       }
       <.div(
@@ -98,8 +100,8 @@ object UsersComponent {
                         title = <.span(<.b(s"Users")).render
                       )(),
                       UserList(
+                        p.router,
                         userDetails,
-                        id => p.proxy.dispatchCB(FetchUserGroupFromExternalId(id)),
                         id => p.proxy.dispatchCB(DeleteUser(id))
                       )
                     )
@@ -134,6 +136,6 @@ object UsersComponent {
     .componentDidMount(scope => scope.backend.mounted(scope.props))
     .build
 
-  def apply(proxy: ModelProxy[UserComponentZoomedModel]) = component(Props(proxy))
+  def apply(proxy: ModelProxy[UserComponentZoomedModel], router: RouterCtl[Location]) = component(Props(proxy, router))
 
 }

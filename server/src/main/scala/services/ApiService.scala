@@ -14,6 +14,7 @@ import shared.requests.groups.members._
 import shared.requests.groups.policies._
 import shared.requests.policies._
 import shared.requests.users.ReadUsersRequest
+import shared.requests.users.groups.ReadUserGroupsRequest
 import shared.responses.FoulkonErrorFromJson
 import shared.responses.groups._
 import shared.responses.groups.members._
@@ -21,7 +22,7 @@ import shared.responses.groups.policies._
 import shared.responses.policies._
 import shared.responses.users._
 import shared.utils.FoulkonErrorUtils
-import shared.{Api, FoulkonError, TotalPolicies, TotalUsers}
+import shared._
 
 import scala.concurrent.Future
 
@@ -112,8 +113,24 @@ class ApiService(
     }
   }
 
-  override def readUserGroups(externalId: String): Future[Either[FoulkonError, List[UserGroup]]] = {
-    getUserGroupRequest(externalId).send().map { response =>
+  val mockUsersGroups: List[UserGroup] =
+    (0 to 550).toList.map { n =>
+      val ns = n.toString
+      UserGroup(
+        ns,
+        ns,
+        ns
+      )
+    }
+  // USERS
+  def readUserGroupsR(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
+    println(s"readUserGroupsMock. Request offset: ${request.offset}. Request limit: ${request.limit}")
+    val x: Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = Future(
+      Right(mockUsersGroups.size -> mockUsersGroups.slice(request.offset, request.offset + request.limit)))
+    x
+  }
+  override def readUserGroups(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
+    getUserGroupRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
@@ -126,7 +143,7 @@ class ApiService(
           }
         )
         .map { userGroupResponse =>
-          userGroupResponse.groups.map { userGroup =>
+          userGroupResponse.total -> userGroupResponse.groups.map { userGroup =>
             UserGroup(
               userGroup.org,
               userGroup.name,

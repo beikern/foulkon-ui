@@ -1,6 +1,7 @@
 package shared.requests.users
 
+import shared.requests.PaginatedRequest
+
 case class ReadUsersRequest(
-  offset: Int = 0,
-  limit: Int = 10
-)
+  offset: Int
+) extends PaginatedRequest
