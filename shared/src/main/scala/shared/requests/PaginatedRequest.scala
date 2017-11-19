@@ -1,6 +1,6 @@
 package shared.requests
 
-import shared.utils.Constants._
+import shared.utils.constants._
 
 trait PaginatedRequest {
   val offset: Int

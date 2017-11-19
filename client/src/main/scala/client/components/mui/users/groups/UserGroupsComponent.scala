@@ -10,7 +10,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.html_<^._
 import shared.requests.users.groups.ReadUserGroupsRequest
-import shared.utils.Constants._
+import shared.utils.constants._
 
 import scala.scalajs.js
 

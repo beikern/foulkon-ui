@@ -1,5 +1,5 @@
 package shared.utils
 
-object Constants {
+object constants {
   val PageSize = 20
 }

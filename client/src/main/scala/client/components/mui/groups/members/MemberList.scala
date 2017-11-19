@@ -8,11 +8,10 @@ import shared.responses.groups.members.MemberAssociatedToGroupInfo
 object MemberList {
 
   case class Props(
-      id: String,
       organizationId: String,
       groupName: String,
       members: List[MemberAssociatedToGroupInfo],
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      removeMemberCallback: (GroupOrg, GroupName, UserId) => Callback
   )
 
   private val component = ScalaComponent
@@ -23,7 +22,6 @@ object MemberList {
           p.members.map { member =>
             <.div(^.className := "card-nested-padded",
                   MemberCard(
-                    p.id,
                     p.organizationId,
                     p.groupName,
                     member,
@@ -36,14 +34,12 @@ object MemberList {
     .build
 
   def apply(
-      id: String,
       organizationId: String,
       groupName: String,
       members: List[MemberAssociatedToGroupInfo],
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      removeMemberCallback: (GroupOrg, GroupName, UserId) => Callback
   ) = component(
     Props(
-      id,
       organizationId,
       groupName,
       members,

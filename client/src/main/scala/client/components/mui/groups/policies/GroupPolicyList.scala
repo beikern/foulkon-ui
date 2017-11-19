@@ -7,7 +7,6 @@ import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
 object GroupPolicyList {
 
   case class Props(
-      id: String,
       organizationId: String,
       groupName: String,
       policies: List[PoliciesAssociatedToGroupInfo]
@@ -21,7 +20,6 @@ object GroupPolicyList {
           p.policies.map { policy =>
             <.div(^.className := "card-nested-padded",
                   GroupPolicyCard(
-                    p.id,
                     p.organizationId,
                     p.groupName,
                     policy
@@ -33,13 +31,11 @@ object GroupPolicyList {
     .build
 
   def apply(
-      id: String,
       organizationId: String,
       groupName: String,
       policies: List[PoliciesAssociatedToGroupInfo]
   ) = component(
     Props(
-      id,
       organizationId,
       groupName,
       policies

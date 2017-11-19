@@ -12,12 +12,11 @@ import scala.scalajs.js
 object CreateMemberGroupDialog {
 
   case class Props(
-      idGroup: String,
       organizationId: String,
-      name: String,
+      groupName: String,
       dialogOpened: Boolean,
       changeDialogState: Boolean => Callback,
-      createGroupMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      createGroupMemberCallback: (GroupOrg, GroupName, UserId) => Callback
   )
   case class State(
       inputValidated: Boolean = false,
@@ -71,7 +70,7 @@ object CreateMemberGroupDialog {
       def handleDialogSubmit: TouchTapEvent => Callback = { TouchTapEvent =>
         s.userIdValue match {
           case Some(userIdValue) =>
-            p.changeDialogState(false) >> p.createGroupMemberCallback(p.idGroup, p.organizationId, p.name, userIdValue) >> $.setState(State())
+            p.changeDialogState(false) >> p.createGroupMemberCallback(p.organizationId, p.groupName, userIdValue) >> $.setState(State())
           case None =>
             Callback.log(s"Something failed, the member was not associated, wooops!") >> p.changeDialogState(false) >> $.setState(State())
         }
@@ -106,12 +105,13 @@ object CreateMemberGroupDialog {
     .build
 
   def apply(
-      idGroup: String,
       organizationId: String,
-      name: String,
+      groupName: String,
       dialogOpened: Boolean,
       changeDialogState: Boolean => Callback,
-      createGroupMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
-  ) = component(Props(idGroup: String, organizationId, name, dialogOpened, changeDialogState, createGroupMemberCallback))
+      createGroupMemberCallback: (GroupOrg, GroupName, UserId) => Callback
+  ) = component(
+    Props(organizationId, groupName, dialogOpened, changeDialogState, createGroupMemberCallback)
+  )
 
 }

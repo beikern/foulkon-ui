@@ -10,12 +10,11 @@ import scala.scalajs.js
 object AreYouSureRemoveGroupMemberDialog {
 
   case class Props(
-      id: String,
       groupOrg: String,
       groupName: String,
       userId: String,
       dialogOpened: Boolean,
-      callbackToDelete: (String, GroupOrg, GroupName, UserId) => Callback,
+      callbackToDelete: (GroupOrg, GroupName, UserId) => Callback,
       changeDialogState: Boolean => Callback
   )
 
@@ -27,7 +26,7 @@ object AreYouSureRemoveGroupMemberDialog {
         Callback.info("Cancel clicked") >> p.changeDialogState(false)
       }
       def handleDialogSubmit: TouchTapEvent => Callback = { TouchTapEvent =>
-        Callback.info("Submit clicked") >> p.callbackToDelete(p.id, p.groupOrg, p.groupName, p.userId) >> p.changeDialogState(false)
+        Callback.info("Submit clicked") >> p.callbackToDelete(p.groupOrg, p.groupName, p.userId) >> p.changeDialogState(false)
       }
 
       val actions: VdomNode = js
@@ -51,13 +50,12 @@ object AreYouSureRemoveGroupMemberDialog {
     .build
 
   def apply(
-      id: String,
       groupOrg: String,
       groupName: String,
       userId: String,
       dialogOpened: Boolean,
-      callbackToDelete: (String, GroupOrg, GroupName, UserId) => Callback,
+      callbackToDelete: (GroupOrg, GroupName, UserId) => Callback,
       changeDialogState: Boolean => Callback
-  ) = component(Props(id, groupOrg, groupName, userId, dialogOpened, callbackToDelete, changeDialogState))
+  ) = component(Props(groupOrg, groupName, userId, dialogOpened, callbackToDelete, changeDialogState))
 
 }

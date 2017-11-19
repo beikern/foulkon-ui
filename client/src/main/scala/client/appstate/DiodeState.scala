@@ -1,8 +1,9 @@
 package client
 package appstate
 
-import client.appstate.groups.members.{GroupMemberFeedbackHandler, GroupMemberHandler, GroupPolicyHandler}
-import client.appstate.groups.{GroupFeedbackHandler, GroupHandler}
+import client.appstate.groups.members.{GroupMemberFeedbackHandler, GroupMemberHandler, GroupMembersPagesAndTotalHandler}
+import client.appstate.groups.policies.{GroupPoliciesPagesAndTotalHandler, GroupPolicyHandler}
+import client.appstate.groups.{GroupFeedbackHandler, GroupHandler, GroupPagesAndTotalHandler}
 import diode._
 import diode.data._
 import shared.entities.{GroupDetail, PolicyDetail, UserDetail, UserGroup}
@@ -14,29 +15,11 @@ import diode.react.ReactConnector
 import shared.responses.groups.members.MemberAssociatedToGroupInfo
 import shared.responses.groups.policies.PoliciesAssociatedToGroupInfo
 
-case class UserWithGroup(
-    user: UserDetail,
-    group: Either[FoulkonError, List[UserGroup]] = Right(List())
-)
-
-case class GroupMetadataWithMember(
-    organizationId: String,
-    name: String,
-    memberInfo: Either[FoulkonError, List[MemberAssociatedToGroupInfo]]
-)
-
-case class GroupMetadataWithPolicy(
-    organizationId: String,
-    groupName: String,
-    policyInfo: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]
-)
-
 // Users
 case class UserFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
 case class UserGroups(userGroups: Either[FoulkonError, List[UserGroup]])
 case class UserGroupsModule(
     userGroups: Pot[UserGroups],
-    userExternalId: Option[String],
     nUserGroups: TotalUserGroups,
     totalPages: TotalPages,
     selectedPage: SelectedPage
@@ -44,7 +27,7 @@ case class UserGroupsModule(
 case class Users(users: Either[FoulkonError, List[UserDetail]])
 case class UserModule(
     users: Pot[Users],
-    nUsers: TotalPolicies,
+    nUsers: TotalUsers,
     totalPages: TotalPages,
     selectedPage: SelectedPage,
     selectedUserGroups: UserGroupsModule,
@@ -53,15 +36,31 @@ case class UserModule(
 
 // Groups
 case class GroupFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
-case class GroupReporting(feedback: Either[FoulkonError, MessageFeedback])
+case class GroupMembers(groupMembers: Either[FoulkonError, List[MemberAssociatedToGroupInfo]])
+case class GroupMembersModule(
+  groupMembers: Pot[GroupMembers],
+  nGroupMembers: TotalUserGroups,
+  totalPages: TotalPages,
+  selectedPage: SelectedPage,
+  groupMemberFeedbackReporting: Option[GroupMemberFeedbackReporting]
+)
+case class GroupPolicies(groupPolicies: Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]])
+case class GroupPoliciesModule(
+  groupPolicies: Pot[GroupPolicies],
+  nGroupPolicies: TotalGroupPolicies,
+  totalPages: TotalPages,
+  selectedPage: SelectedPage
+)
 case class Groups(groups: Either[FoulkonError, List[GroupDetail]])
 case class GroupMemberFeedbackReporting(feedback: Either[FoulkonError, MessageFeedback])
 case class GroupModule(
-    groups: Pot[Groups],
-    members: Map[String, GroupMetadataWithMember],
-    policies: Map[String, GroupMetadataWithPolicy],
-    groupFeedbackReporting: Option[GroupFeedbackReporting],
-    groupMemberFeedbackReporting: Option[GroupMemberFeedbackReporting]
+  groups: Pot[Groups],
+  nGroups: TotalGroups,
+  totalPages: TotalPages,
+  selectedPage: SelectedPage,
+  selectedGroupMembers: GroupMembersModule,
+  selectedGroupPolicies: GroupPoliciesModule,
+  groupFeedbackReporting: Option[GroupFeedbackReporting]
 )
 
 // Policies
@@ -92,9 +91,8 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
         nUsers = 0,
         totalPages = 0,
         selectedPage = 0,
-        UserGroupsModule(
+        selectedUserGroups = UserGroupsModule(
           userGroups = Empty,
-          userExternalId = None,
           nUserGroups = 0,
           totalPages = 0,
           selectedPage = 0
@@ -103,10 +101,23 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
       ),
       GroupModule(
         groups = Empty,
-        members = Map(),
-        policies = Map(),
-        groupFeedbackReporting = None,
-        groupMemberFeedbackReporting = None
+        nGroups = 0,
+        totalPages = 0,
+        selectedPage = 0,
+        selectedGroupMembers = GroupMembersModule(
+          groupMembers = Empty,
+          nGroupMembers = 0,
+          totalPages = 0,
+          selectedPage = 0,
+          groupMemberFeedbackReporting = None
+        ),
+        selectedGroupPolicies = GroupPoliciesModule(
+          groupPolicies = Empty,
+          nGroupPolicies = 0,
+          totalPages = 0,
+          selectedPage = 0
+        ),
+        groupFeedbackReporting = None
       ),
       PolicyModule(
         policies = Empty,
@@ -135,10 +146,30 @@ object SPACircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
     new GroupHandler(zoomRW(_.groupModule.groups)((m, v) => m.copy(groupModule = m.groupModule.copy(groups = v)))),
     new GroupFeedbackHandler(
       zoomRW(_.groupModule.groupFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupFeedbackReporting = v)))),
-    new GroupMemberHandler(zoomRW(_.groupModule.members)((m, v) => m.copy(groupModule = m.groupModule.copy(members = v)))),
+    new GroupPagesAndTotalHandler(zoomRW(root => (root.groupModule.nGroups, root.groupModule.totalPages, root.groupModule.selectedPage))((m, v) =>
+      m.copy(groupModule = m.groupModule.copy(nGroups = v._1, totalPages = v._2, selectedPage = v._3)))),
+    new GroupMemberHandler(zoomRW(_.groupModule.selectedGroupMembers.groupMembers)((m, v) => m.copy(groupModule = m.groupModule.copy(selectedGroupMembers = m.groupModule.selectedGroupMembers.copy(groupMembers = v))))),
+    new GroupMembersPagesAndTotalHandler(
+      zoomRW(
+        root =>
+          (root.groupModule.selectedGroupMembers.nGroupMembers,
+            root.groupModule.selectedGroupMembers.totalPages,
+            root.groupModule.selectedGroupMembers.selectedPage))((m, v) =>
+        m.copy(groupModule = m.groupModule.copy(
+          selectedGroupMembers = m.groupModule.selectedGroupMembers.copy(nGroupMembers = v._1, totalPages = v._2, selectedPage = v._3))))
+    ),
     new GroupMemberFeedbackHandler(
-      zoomRW(_.groupModule.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(groupMemberFeedbackReporting = v)))),
-    new GroupPolicyHandler(zoomRW(_.groupModule.policies)((m, v) => m.copy(groupModule = m.groupModule.copy(policies = v)))),
+      zoomRW(_.groupModule.selectedGroupMembers.groupMemberFeedbackReporting)((m, v) => m.copy(groupModule = m.groupModule.copy(selectedGroupMembers = m.groupModule.selectedGroupMembers.copy(groupMemberFeedbackReporting = v))))),
+    new GroupPolicyHandler(zoomRW(_.groupModule.selectedGroupPolicies.groupPolicies)((m, v) => m.copy(groupModule = m.groupModule.copy(selectedGroupPolicies = m.groupModule.selectedGroupPolicies.copy(groupPolicies = v))))),
+    new GroupPoliciesPagesAndTotalHandler(
+      zoomRW(
+        root =>
+          (root.groupModule.selectedGroupPolicies.nGroupPolicies,
+            root.groupModule.selectedGroupPolicies.totalPages,
+            root.groupModule.selectedGroupPolicies.selectedPage))((m, v) =>
+        m.copy(groupModule = m.groupModule.copy(
+          selectedGroupPolicies = m.groupModule.selectedGroupPolicies.copy(nGroupPolicies = v._1, totalPages = v._2, selectedPage = v._3))))
+    ),
     new PolicyHandler(zoomRW(_.policyModule.policies)((m, v) => m.copy(policyModule = m.policyModule.copy(policies = v)))),
     new PolicyPagesAndTotalHandler(
       zoomRW(root => (root.policyModule.nPolicies, root.policyModule.totalPages, root.policyModule.selectedPage))((m, v) =>
