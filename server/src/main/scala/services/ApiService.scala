@@ -31,26 +31,8 @@ class ApiService(
 ) extends Api
     with AkkaContext
     with FoulkonClient {
-
-  val mockUsers: List[UserDetail] =
-    (0 to 550).toList.map { n =>
-      val ns = n.toString
-      UserDetail(
-        UUID.randomUUID().toString,
-        ns,
-        ns,
-        ns,
-        ns,
-        ns
-      )
-    }
   // USERS
-  def readUsersMock(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = {
-    println(s"readUsers mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
-    val x: Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = Future(
-      Right(mockUsers.size -> mockUsers.slice(request.offset, request.offset + request.limit)))
-    x
-  }
+
   def readUsers(request: ReadUsersRequest): Future[Either[FoulkonError, (TotalUsers, List[UserDetail])]] = {
 
     val listAllUserResponse = listAllUsersRequest(request).send().map { response =>
@@ -111,23 +93,6 @@ class ApiService(
       }
       listAllUserResponse.map(_.map(_.total).flatMap(total => mappedResult.map(l => total -> l)))
     }
-  }
-
-  val mockUsersGroups: List[UserGroup] =
-    (0 to 550).toList.map { n =>
-      val ns = n.toString
-      UserGroup(
-        ns,
-        ns,
-        ns
-      )
-    }
-  // USERS
-  def readUserGroupsR(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
-    println(s"readUserGroupsMock. Request offset: ${request.offset}. Request limit: ${request.limit}")
-    val x: Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = Future(
-      Right(mockUsersGroups.size -> mockUsersGroups.slice(request.offset, request.offset + request.limit)))
-    x
   }
   override def readUserGroups(request: ReadUserGroupsRequest): Future[Either[FoulkonError, (TotalUserGroups, List[UserGroup])]] = {
     getUserGroupRequest(request).send().map { response =>
@@ -215,8 +180,8 @@ class ApiService(
         )
     }
   }
-  def readGroups(): Future[Either[FoulkonError, List[GroupDetail]]] = {
-    val listAllGroupsResponse = listAllGroupsRequest.send().map { response =>
+  def readGroups(request: ReadGroupsRequest): Future[Either[FoulkonError, (TotalGroups, List[GroupDetail])]] = {
+    val listAllGroupsResponse = listAllGroupsRequest(request).send().map { response =>
       response.body
         .bimap(
           fa = error => {
@@ -258,8 +223,8 @@ class ApiService(
         .map(_.sequenceU)
     }
 
-    apiResult.map {
-      _.map { groupDetailResponseList =>
+    apiResult.flatMap { eitherResult =>
+      val mappedResult = eitherResult.map { groupDetailResponseList =>
         groupDetailResponseList.map { groupDetailResponse =>
           GroupDetail(
             groupDetailResponse.id,
@@ -272,6 +237,7 @@ class ApiService(
           )
         }
       }
+      listAllGroupsResponse.map(_.map(_.total).flatMap(total => mappedResult.map(l => total -> l)))
     }
   }
   override def updateGroup(request: UpdateGroupRequest): Future[Either[FoulkonError, GroupDetail]] = {
@@ -308,7 +274,7 @@ class ApiService(
         }
     }
   }
-  override def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, List[MemberAssociatedToGroupInfo]]] = {
+  override def readMemberGroup(request: MemberGroupRequest): Future[Either[FoulkonError, (TotalGroupMembers, List[MemberAssociatedToGroupInfo])]] = {
     memberGroupRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -318,7 +284,7 @@ class ApiService(
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
-            responseEither.right.get.members
+            responseEither.right.get.total -> responseEither.right.get.members
           }
         )
     }
@@ -343,7 +309,7 @@ class ApiService(
         }
     }
   }
-  def readPoliciesAssociatedToGroup(request: PoliciesAssociatedToGroupRequest): Future[Either[FoulkonError, List[PoliciesAssociatedToGroupInfo]]] = {
+  def readPoliciesAssociatedToGroup(request: PoliciesAssociatedToGroupRequest): Future[Either[FoulkonError, (TotalGroupPolicies, List[PoliciesAssociatedToGroupInfo])]] = {
     policiesAssociatedToGroupRequest(request).send().map { response =>
       response.body
         .bimap(
@@ -353,7 +319,7 @@ class ApiService(
             FoulkonErrorUtils.parseError(response.code, decodeError.code, decodeError.message)
           },
           fb = responseEither => {
-            responseEither.right.get.policies
+            responseEither.right.get.total -> responseEither.right.get.policies
           }
         )
     }
@@ -450,27 +416,6 @@ class ApiService(
       }
       listAllPoliciesResponse.map(_.map(_.total).flatMap(total => mappedResult.map(l => total -> l)))
     }
-  }
-
-  val mockPolicies: List[PolicyDetail] =
-    (0 to 35).toList.map { n =>
-      val ns = n.toString
-      PolicyDetail(
-        UUID.randomUUID().toString,
-        ns,
-        ns,
-        ns,
-        ns,
-        ns,
-        ns,
-        List()
-      )
-    }
-  def readPoliciesMock(request: ReadPoliciesRequest): Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]] = {
-    println(s"readPolicies mock. Request offset: ${request.offset}. Request limit: ${request.limit}")
-    val x: Future[Either[FoulkonError, (TotalPolicies, List[PolicyDetail])]] = Future(
-      Right(mockPolicies.size -> mockPolicies.slice(request.offset, request.offset + request.limit)))
-    x
   }
   override def deletePolicy(request: DeletePolicyRequest): Future[Either[FoulkonError, DeletePolicyResponse]] = {
     deletePolicyRequest(request).send.map { response =>

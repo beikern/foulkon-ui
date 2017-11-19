@@ -10,7 +10,7 @@ import diode.{Effect, _}
 import shared._
 import shared.entities.UserGroup
 import shared.requests.users.groups.ReadUserGroupsRequest
-import shared.utils.Constants._
+import shared.utils.constants._
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -49,6 +49,7 @@ class UserGroupHandler[M](modelRW: ModelRW[M, Pot[UserGroups]]) extends ActionHa
           updated(
             Ready(UserGroups(leftResult.map(_._2))),
             Effect(Future(UpdateTotalUserGroupsAndPages(0)))
+              >> Effect(Future(UpdateSelectedPage(0)))
           )
       }
   }

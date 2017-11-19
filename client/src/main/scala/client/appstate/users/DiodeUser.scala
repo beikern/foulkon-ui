@@ -10,7 +10,7 @@ import shared._
 import shared.entities.{UserDetail, UserGroup}
 import shared.responses.users.UserDeleteResponse
 import boopickle.Default._
-import shared.utils.Constants._
+import shared.utils.constants._
 import shared.requests.users.ReadUsersRequest
 
 import scala.concurrent.Future
@@ -63,35 +63,6 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[Users]]) extends ActionHandler(mode
             Effect(Future(UpdateTotalUsersAndPages(0)))
           )
       }
-//    case ObtainUserGroupFromExternalId(id) =>
-//      effectOnly(
-//        Effect(
-//          AjaxClient[Api]
-//            .readUserGroups(id)
-//            .call()
-//            .map(
-//              userGroupEither =>
-//                UpdateUserGroup(id,
-//                                userGroupEither.map(
-//                                  ug => id -> ug
-//                                ))
-//            )
-//        )
-//      )
-//    case UpdateUserGroup(externalId, userGroupEither) => // TODO beikern => ñapa, deshacer
-//      val userGroupToUpdate: Either[FoulkonError, List[UserGroup]] = userGroupEither.map {
-//        case ((_, userGroup)) => userGroup
-//      }
-//      ModelUpdate(
-//        modelRW.updated(
-//          modelRW.value.map { userModel =>
-//            Users(userModel.users.map { userMap =>
-//              val userToUpdate = userMap(externalId).copy(group = userGroupToUpdate)
-//              userMap.updated(externalId, userToUpdate)
-//            })
-//          }
-//        )
-//      )
     case DeleteUser(externalId) =>
       effectOnly(
         Effect(

@@ -23,11 +23,10 @@ object MemberCard {
   }
 
   case class Props(
-      id: String,
       organizationId: String,
       groupName: String,
       memberInfo: MemberAssociatedToGroupInfo,
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      removeMemberCallback: (GroupOrg, GroupName, UserId) => Callback
   )
 
   case class State(
@@ -48,7 +47,6 @@ object MemberCard {
 
       <.div(
         AreYouSureRemoveGroupMemberDialog(
-          p.id,
           p.organizationId,
           p.groupName,
           p.memberInfo.user,
@@ -88,15 +86,13 @@ object MemberCard {
     .build
 
   def apply(
-      id: String,
       organizationId: String,
       groupName: String,
       memberInfo: MemberAssociatedToGroupInfo,
-      removeMemberCallback: (String, GroupOrg, GroupName, UserId) => Callback
+      removeMemberCallback: (GroupOrg, GroupName, UserId) => Callback
   ) =
     component(
       Props(
-        id,
         organizationId,
         groupName,
         memberInfo,

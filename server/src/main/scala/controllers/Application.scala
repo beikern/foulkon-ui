@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import boopickle.Default.{Pickle, Pickler, Unpickle}
 import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, InjectedController, RawBuffer}
-import services.ApiService
+import services.{ApiService, ApiServiceMock}
 import boopickle.Default._
 import com.google.inject.Inject
 import contexts.AkkaContext

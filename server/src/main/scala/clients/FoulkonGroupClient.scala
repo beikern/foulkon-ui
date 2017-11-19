@@ -13,8 +13,9 @@ import shared.responses.groups.policies.PoliciesAssociatedToGroupResponse
 
 trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
   val listAllGroupsRequest =
+    (request: ReadGroupsRequest) =>
     sttp
-      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/groups?Limit=1000")
+      .get(uri"http://$foulkonHost:$foulkonPort/api/v1/groups?Offset=${request.offset}&Limit=${request.limit}")
       .contentType("application/json")
       .auth
       .basic(foulkonUser, foulkonPassword)
@@ -62,7 +63,7 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
     (request: MemberGroupRequest) =>
       sttp
         .get(
-          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.name}/users?Limit=1000")
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.groupName}/users?Offset=${request.offset}&Limit=${request.limit}")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)
@@ -92,7 +93,7 @@ trait FoulkonGroupClient extends FoulkonConfig { self: AkkaContext =>
     (request: PoliciesAssociatedToGroupRequest) =>
       sttp
         .get(
-          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.groupName}/policies?Limit=1000")
+          uri"http://$foulkonHost:$foulkonPort/api/v1/organizations/${request.pathParams.organizationId}/groups/${request.pathParams.groupName}/policies?Offset=${request.offset}&Limit=${request.limit}")
         .contentType("application/json")
         .auth
         .basic(foulkonUser, foulkonPassword)
